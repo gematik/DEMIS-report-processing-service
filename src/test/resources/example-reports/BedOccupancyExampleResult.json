@@ -1,0 +1,174 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "bundle",
+      "resource": {
+        "resourceType": "Bundle",
+        "meta": {
+          "profile": [
+            "https://demis.rki.de/fhir/StructureDefinition/ReceiptBundle"
+          ]
+        },
+        "type": "collection",
+        "entry": [
+          {
+            "fullUrl": "https://demis.rki.de/fhir/Composition/94709a92-ee29-4b85-99a0-e9c8dd2afd3d",
+            "resource": {
+              "resourceType": "Composition",
+              "id": "94709a92-ee29-4b85-99a0-e9c8dd2afd3d",
+              "meta": {
+                "profile": [
+                  "https://demis.rki.de/fhir/StructureDefinition/NotificationReceipt"
+                ]
+              },
+              "extension": [
+                {
+                  "url": "https://demis.rki.de/fhir/StructureDefinition/ReceivedNotification",
+                  "valueIdentifier": {
+                    "system": "https://demis.rki.de/fhir/NamingSystem/NotificationBundleId",
+                    "value": "94709a92-ee29-4b85-99a0-e9c8dd2afd3d"
+                  }
+                }
+              ],
+              "status": "final",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "80563-0",
+                    "display": "Report"
+                  }
+                ]
+              },
+              "date": "2020-01-01T00:00:00+01:00",
+              "author": [
+                {
+                  "reference": "Organization/DEMIS"
+                }
+              ],
+              "title": "Meldevorgangsquittung",
+              "relatesTo": [
+                {
+                  "code": "appends",
+                  "targetReference": {
+                    "type": "Composition",
+                    "identifier": {
+                      "system": "https://demis.rki.de/fhir/NamingSystem/NotificationId",
+                      "value": "5e1e89ce-7a44-4ec1-801c-0f988992e8fe"
+                    }
+                  }
+                }
+              ],
+              "section": [
+                {
+                  "title": "Empfänger",
+                  "code": {
+                    "text": "Empfänger"
+                  },
+                  "entry": [
+                    {
+                      "reference": "Organization/1."
+                    }
+                  ]
+                },
+                {
+                  "title": "PDF Quittung",
+                  "code": {
+                    "text": "PDF Quittung"
+                  },
+                  "entry": [
+                    {
+                      "reference": "Binary/94709a92-ee29-4b85-99a0-e9c8dd2afd3d"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://demis.rki.de/fhir/Organization/DEMIS",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "DEMIS",
+              "name": "DEMIS",
+              "contact": [
+                {
+                  "telecom": [
+                    {
+                      "system": "email",
+                      "value": "demis@rki.de"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://demis.rki.de/fhir/Organization/1.",
+            "resource": {
+              "resourceType": "Organization",
+              "id": "1.",
+              "identifier": [
+                {
+                  "system": "https://demis.rki.de/fhir/CodeSystem/reportingSite",
+                  "value": "1."
+                }
+              ],
+              "name": "Robert Koch-Institut",
+              "telecom": [
+                {
+                  "system": "email",
+                  "value": "demis@rki.de"
+                }
+              ],
+              "address": [
+                {
+                  "line": [
+                    "Nordufer 20"
+                  ],
+                  "city": "Berlin",
+                  "postalCode": "13353",
+                  "country": "20422"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://demis.rki.de/fhir/Binary/94709a92-ee29-4b85-99a0-e9c8dd2afd3d",
+            "resource": {
+              "resourceType": "Binary",
+              "id": "94709a92-ee29-4b85-99a0-e9c8dd2afd3d",
+              "contentType": "application/pdf",
+              "data": "TW9ja1BkZg=="
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "operationOutcome",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "meta": {
+          "profile": [
+            "https://demis.rki.de/fhir/StructureDefinition/ProcessNotificationResponse"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">http://www.w3.org/1999/xhtml</div>"
+        },
+        "issue": [
+          {
+            "severity": "information",
+            "code": "informational",
+            "details": {
+              "text": "All OK"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
