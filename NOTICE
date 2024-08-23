@@ -88,7 +88,6 @@ This project includes:
   JavaMail API (no providers) under CDDL/GPLv2+CE
   javax.inject under The Apache Software License, Version 2.0
   JBoss Logging 3 under Apache License 2.0
-  JCIP Annotations under Apache License under Apache License, Version 2.0
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   jmustache under The (New) BSD License
   Joda-Time under Apache License, Version 2.0
@@ -184,10 +183,16 @@ This project includes:
   Prometheus Java Span Context Supplier - Common under The Apache Software License, Version 2.0
   Prometheus Java Span Context Supplier - OpenTelemetry under The Apache Software License, Version 2.0
   Prometheus Java Span Context Supplier - OpenTelemetry Agent under The Apache Software License, Version 2.0
+  Prometheus Metrics Config under The Apache Software License, Version 2.0
+  Prometheus Metrics Core under The Apache Software License, Version 2.0
+  Prometheus Metrics Exposition Formats under The Apache Software License, Version 2.0
+  Prometheus Metrics Model under The Apache Software License, Version 2.0
+  Prometheus Metrics Tracer Common under The Apache Software License, Version 2.0
   reactive-streams under MIT-0
   Reactor Extra under Apache License, Version 2.0
   report-processing-service under Licensed under the EUPL 1.2
-  service-base under EUPL 1.2
+  service-base under Licensed under the EUPL 1.2
+  Shaded Protobuf under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0

@@ -41,9 +41,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import de.gematik.demis.notification.builder.demis.fhir.notification.BedOccupancyExampleCreationService;
+import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBedOccupancyDataBuilder;
+import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBundleDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.utils.Utils;
 import de.gematik.demis.reportprocessingservice.IDPFaker;
 import de.gematik.demis.reportprocessingservice.properties.OAuth2Properties;
@@ -54,7 +56,15 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -88,8 +98,10 @@ class SecuredReportProcessingControllerIntegrationTest {
   private static final WireMockServer pdfServer = new WireMockServer(7073);
   private static final IDPFaker idpFaker = new IDPFaker();
   private static final String VS_ALL_OKAY_JSON = "{\"resourceType\":\"OperationOutcome\"}";
+  public static final String HOSPITAL_ID = "772557";
   @Autowired private OAuth2Properties oAuth2Properties;
   @Autowired private ObjectMapper jsonMapper;
+  @Autowired private FhirContext fhirContext;
 
   @Value("${wiremock-issuer-uri}")
   private String issuerUri;
@@ -144,17 +156,17 @@ class SecuredReportProcessingControllerIntegrationTest {
             .willReturn(
                 okJson(
                     """
-                                    [
-                                        {
-                                            "id": 987654,
-                                            "ik": 987654321,
-                                            "label": "Testkrankenhaus - gematik GmbH",
-                                            "postalCode": 10117,
-                                            "city": "Berlin",
-                                            "line": "Friedrichstr.",
-                                            "houseNumber": "136"
-                                        }
-                                    ]""")));
+                        [
+                            {
+                                "id": 987654,
+                                "ik": 987654321,
+                                "label": "Testkrankenhaus - gematik GmbH",
+                                "postalCode": 10117,
+                                "city": "Berlin",
+                                "line": "Friedrichstr.",
+                                "houseNumber": "136"
+                            }
+                        ]""")));
 
     configureFor(pdfServer.port());
     stubFor(
@@ -199,17 +211,17 @@ class SecuredReportProcessingControllerIntegrationTest {
             .willReturn(
                 okJson(
                     """
-                                                    [
-                                                        {
-                                                            "id": 987654,
-                                                            "ik": 987654321,
-                                                            "label": "Testkrankenhaus - gematik GmbH",
-                                                            "postalCode": 10117,
-                                                            "city": "Berlin",
-                                                            "line": "Friedrichstr.",
-                                                            "houseNumber": "136"
-                                                        }
-                                                    ]""")));
+                        [
+                            {
+                                "id": 987654,
+                                "ik": 987654321,
+                                "label": "Testkrankenhaus - gematik GmbH",
+                                "postalCode": 10117,
+                                "city": "Berlin",
+                                "line": "Friedrichstr.",
+                                "houseNumber": "136"
+                            }
+                        ]""")));
 
     configureFor(pdfServer.port());
     stubFor(
@@ -255,17 +267,17 @@ class SecuredReportProcessingControllerIntegrationTest {
             .willReturn(
                 okJson(
                     """
-                                    [
-                                        {
-                                            "id": 987654,
-                                            "ik": 987654321,
-                                            "label": "Testkrankenhaus - gematik GmbH",
-                                            "postalCode": 10117,
-                                            "city": "Berlin",
-                                            "line": "Friedrichstr.",
-                                            "houseNumber": "136"
-                                        }
-                                    ]""")));
+                        [
+                            {
+                                "id": 987654,
+                                "ik": 987654321,
+                                "label": "Testkrankenhaus - gematik GmbH",
+                                "postalCode": 10117,
+                                "city": "Berlin",
+                                "line": "Friedrichstr.",
+                                "houseNumber": "136"
+                            }
+                        ]""")));
 
     configureFor(pdfServer.port());
     stubFor(
@@ -445,9 +457,8 @@ class SecuredReportProcessingControllerIntegrationTest {
   @Test
   void givenMissingAcceptHeaderRequestWhenPostReportThenUseContentTypeAnd200JSONCase()
       throws Exception {
-
-    final String content =
-        new BedOccupancyExampleCreationService().createTestBedOccupancyBundleJson();
+    Bundle report = getExampleReport();
+    final String content = fhirContext.newJsonParser().encodeResourceToString(report);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(idpFaker.fakingToken(issuerUri, oAuth2Properties));
@@ -470,18 +481,22 @@ class SecuredReportProcessingControllerIntegrationTest {
                 urlPathMatching(".*\\/hospital-locations.*"))
             .willReturn(
                 okJson(
-                    """
-                                    [
-                                        {
-                                            "id": 772557,
-                                            "ik": 987654321,
-                                            "label": "Sankt Gertrauden-Krankenhaus GmbH",
-                                            "postalCode": 12345,
-                                            "city": "Musterstadt",
-                                            "line": "Musterstr.",
-                                            "houseNumber": "1"
-                                        }
-                                    ]""")));
+                        """
+                        [
+                            {
+                                  "id":"""
+                        + HOSPITAL_ID
+                        +
+                        """
+                                ,
+                                "ik": 987654321,
+                                "label": "Sankt Gertrauden-Krankenhaus GmbH",
+                                "postalCode": 12345,
+                                "city": "Musterstadt",
+                                "line": "Musterstr.",
+                                "houseNumber": "1"
+                            }
+                        ]""")));
     configureFor(pdfServer.port());
     stubFor(
         com.github.tomakehurst.wiremock.client.WireMock.post(urlPathMatching(".*\\/bedOccupancy"))
@@ -502,9 +517,8 @@ class SecuredReportProcessingControllerIntegrationTest {
   @Test
   void givenMissingAcceptHeaderRequestWhenPostReportThenUseContentTypeAnd200XMLCase()
       throws Exception {
-
-    final String content =
-        new BedOccupancyExampleCreationService().createTestBedOccupancyBundleXml();
+    Bundle report = getExampleReport();
+    final String content = fhirContext.newXmlParser().encodeResourceToString(report);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(idpFaker.fakingToken(issuerUri, oAuth2Properties));
@@ -527,18 +541,22 @@ class SecuredReportProcessingControllerIntegrationTest {
                 urlPathMatching(".*\\/hospital-locations.*"))
             .willReturn(
                 okJson(
-                    """
-                                                    [
-                                                        {
-                                                            "id": 772557,
-                                                            "ik": 987654321,
-                                                            "label": "Sankt Gertrauden-Krankenhaus GmbH",
-                                                            "postalCode": 12345,
-                                                            "city": "Musterstadt",
-                                                            "line": "Musterstr.",
-                                                            "houseNumber": "1"
-                                                        }
-                                                    ]""")));
+                        """
+                        [
+                            {
+                                "id":"""
+                        + HOSPITAL_ID
+                        +
+                        """
+                                ,
+                                "ik": 987654321,
+                                "label": "Sankt Gertrauden-Krankenhaus GmbH",
+                                "postalCode": 12345,
+                                "city": "Musterstadt",
+                                "line": "Musterstr.",
+                                "houseNumber": "1"
+                            }
+                        ]""")));
     configureFor(pdfServer.port());
     stubFor(
         com.github.tomakehurst.wiremock.client.WireMock.post(urlPathMatching(".*\\/bedOccupancy"))
@@ -551,6 +569,21 @@ class SecuredReportProcessingControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(header().string(CONTENT_TYPE, APPLICATION_XML_VALUE))
         .andExpect(content().string(containsString(ALL_OK)));
+  }
+
+  private static Bundle getExampleReport() {
+    final Composition compo =
+        new ReportBedOccupancyDataBuilder()
+            .setDefaults()
+            .setSubject(new Identifier().setValue(HOSPITAL_ID))
+            .build();
+    Bundle report =
+        new ReportBundleDataBuilder()
+            .setReportBedOccupancy(compo)
+            .setNotifierRole(new PractitionerRole())
+            .setDefaults()
+            .build();
+    return report;
   }
 
   @Test
@@ -632,15 +665,15 @@ class SecuredReportProcessingControllerIntegrationTest {
                     .withStatus(422)
                     .withBody(
                         """
+                            {
+                                "resourceType": "OperationOutcome",
+                                "issue": [
                                     {
-                                        "resourceType": "OperationOutcome",
-                                        "issue": [
-                                            {
-                                                "severity": "fatal",
-                                                "diagnostics": "Given data is not a valid json"
-                                            }
-                                        ]
-                                    }""")));
+                                        "severity": "fatal",
+                                        "diagnostics": "Given data is not a valid json"
+                                    }
+                                ]
+                            }""")));
 
     mockMvc
         .perform(post("/$process-report").headers(headers).content(content))
@@ -762,24 +795,24 @@ class SecuredReportProcessingControllerIntegrationTest {
   void givenUnsupportedProfileTypeWhenPostReportThen422() throws Exception {
     String content =
         """
-                    {
-                      "resourceType": "Bundle",
-                      "meta": {
-                        "profile": [
-                          "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
-                        ]
-                      },
-                      "entry": [
-                        {
-                          "resource": {
-                            "resourceType": "Composition",
-                            "identifier": {
-                              "value": "composition-identifier"
-                            }
-                          }
-                        }
-                      ]
-                    }""";
+            {
+              "resourceType": "Bundle",
+              "meta": {
+                "profile": [
+                  "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
+                ]
+              },
+              "entry": [
+                {
+                  "resource": {
+                    "resourceType": "Composition",
+                    "identifier": {
+                      "value": "composition-identifier"
+                    }
+                  }
+                }
+              ]
+            }""";
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(APPLICATION_XML);
     headers.setAccept(List.of(APPLICATION_JSON));
@@ -824,17 +857,17 @@ class SecuredReportProcessingControllerIntegrationTest {
               .willReturn(
                   okJson(
                       """
-                                                    [
-                                                        {
-                                                            "id": 987654,
-                                                            "ik": 987654321,
-                                                            "label": "Testkrankenhaus - gematik GmbH",
-                                                            "postalCode": 10117,
-                                                            "city": "Berlin",
-                                                            "line": "Friedrichstr.",
-                                                            "houseNumber": "136"
-                                                        }
-                                                    ]""")));
+                          [
+                              {
+                                  "id": 987654,
+                                  "ik": 987654321,
+                                  "label": "Testkrankenhaus - gematik GmbH",
+                                  "postalCode": 10117,
+                                  "city": "Berlin",
+                                  "line": "Friedrichstr.",
+                                  "houseNumber": "136"
+                              }
+                          ]""")));
 
       configureFor(pdfServer.port());
       stubFor(
@@ -948,24 +981,24 @@ class SecuredReportProcessingControllerIntegrationTest {
   void shouldReturn422WithUnsupportedProfile() throws Exception {
     String content =
         """
-                    {
-                      "resourceType": "Bundle",
-                      "meta": {
-                        "profile": [
-                          "https://demis.rki.de/fhir/StructureDefinition/ReportBundleUnsupported"
-                        ]
-                      },
-                      "entry": [
-                        {
-                          "resource": {
-                            "resourceType": "Composition",
-                            "identifier": {
-                              "value": "composition-identifier"
-                            }
-                          }
-                        }
-                      ]
-                    }""";
+            {
+              "resourceType": "Bundle",
+              "meta": {
+                "profile": [
+                  "https://demis.rki.de/fhir/StructureDefinition/ReportBundleUnsupported"
+                ]
+              },
+              "entry": [
+                {
+                  "resource": {
+                    "resourceType": "Composition",
+                    "identifier": {
+                      "value": "composition-identifier"
+                    }
+                  }
+                }
+              ]
+            }""";
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(APPLICATION_JSON);
     headers.setAccept(List.of(APPLICATION_JSON));

@@ -18,10 +18,18 @@
 
 package de.gematik.demis.reportprocessingservice.testobjects;
 
+import static de.gematik.demis.reportprocessingservice.testobjects.TestUtils.getJsonParser;
+
+import ca.uhn.fhir.util.TestUtil;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import org.hl7.fhir.r4.model.Bundle;
 
 public class TestObjects {
+
+  public static final String PROVENANCE_RESOURCE = "/entries/provenanceResource.json";
 
   public static String standardContent() throws IOException {
     return new String(
@@ -39,5 +47,29 @@ public class TestObjects {
             .getResourceAsStream("example-reports/BedOccupancyExampleReturn.json")
             .readAllBytes(),
         StandardCharsets.UTF_8);
+  }
+
+  public static Bundle getBundle(final String resourceName) {
+    return getJsonParser().parseResource(Bundle.class, readResourceAsString(resourceName));
+  }
+
+  public static String readResourceAsString(final String resourceName) {
+    return new String(readResourceBytes(resourceName), StandardCharsets.UTF_8);
+  }
+
+  public static byte[] readResourceBytes(final String resourceName) {
+    try (final InputStream is = readResource(resourceName)) {
+      return is.readAllBytes();
+    } catch (final IOException e) {
+      throw new UncheckedIOException("error reading classpath resource " + resourceName, e);
+    }
+  }
+
+  public static InputStream readResource(final String resourceName) {
+    final InputStream is = TestUtil.class.getResourceAsStream(resourceName);
+    if (is == null) {
+      throw new IllegalStateException("missing resource file " + resourceName);
+    }
+    return is;
   }
 }

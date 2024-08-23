@@ -28,6 +28,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import de.gematik.demis.reportprocessingservice.utils.BundleOperationService;
 import de.gematik.demis.reportprocessingservice.utils.DateTimeService;
 import de.gematik.demis.reportprocessingservice.utils.UUID5Generator;
 import java.util.Date;
@@ -54,6 +55,7 @@ class ReportEnrichmentServiceTest {
   private static Date date;
   private ListAppender<ILoggingEvent> listAppender;
   @InjectMocks private ReportEnrichmentService reportEnrichmentService;
+  @Mock private BundleOperationService bundleOperationServiceMock;
   @Mock private DateTimeService dateTimeServiceMock;
 
   ReportEnrichmentServiceTest() {}
@@ -83,6 +85,8 @@ class ReportEnrichmentServiceTest {
     Bundle bundle = new Bundle();
     bundle.addEntry(bundleEntryComponentComposition);
 
+    when(bundleOperationServiceMock.getComposition(bundle)).thenReturn(Optional.of(composition));
+
     reportEnrichmentService.enrichReportBundle(bundle, REQUEST_ID);
 
     verify(composition).addExtension(any());
@@ -99,6 +103,8 @@ class ReportEnrichmentServiceTest {
 
     Bundle bundle = new Bundle();
     bundle.addEntry(bundleEntryComponentComposition);
+
+    when(bundleOperationServiceMock.getComposition(bundle)).thenReturn(Optional.of(composition));
 
     reportEnrichmentService.enrichReportBundle(bundle, REQUEST_ID);
 

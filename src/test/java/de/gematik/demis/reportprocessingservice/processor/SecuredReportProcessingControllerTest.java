@@ -94,6 +94,7 @@ class SecuredReportProcessingControllerTest {
             any(),
             any(MediaType.class),
             anyString(),
+            anyString(),
             anyString()))
         .thenReturn(ResponseEntity.ok().body(content));
     HttpHeaders headers = new HttpHeaders();
@@ -230,6 +231,7 @@ class SecuredReportProcessingControllerTest {
             any(MediaType.class),
             any(),
             any(MediaType.class),
+            anyString(),
             anyString(),
             anyString());
 

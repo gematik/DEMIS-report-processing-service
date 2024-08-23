@@ -21,6 +21,7 @@ package de.gematik.demis.reportprocessingservice.internal;
 import static java.lang.String.format;
 
 import de.gematik.demis.notification.builder.demis.fhir.notification.utils.Utils;
+import de.gematik.demis.reportprocessingservice.utils.BundleOperationService;
 import de.gematik.demis.reportprocessingservice.utils.DateTimeService;
 import de.gematik.demis.reportprocessingservice.utils.UUID5Generator;
 import java.util.Optional;
@@ -42,10 +43,11 @@ public class ReportEnrichmentService {
   public static final String NOTIFICATION_BUNDLE_IDENTIFIER_SYSTEM =
       "https://demis.rki.de/fhir/NamingSystem/NotificationBundleId";
   private final DateTimeService dateTimeService;
+  private final BundleOperationService bundleOperationService;
 
   public void enrichReportBundle(Bundle bundle, String requestId) {
     log.debug("enrichment start");
-    Optional<Composition> composition = getComposition(bundle);
+    Optional<Composition> composition = bundleOperationService.getComposition(bundle);
     composition.ifPresent(this::setReceptionTimeStamp);
     setReceiver(bundle);
 
@@ -71,15 +73,6 @@ public class ReportEnrichmentService {
   private void setReceiver(Bundle bundle) {
     Meta meta = bundle.getMeta();
     meta.addTag().setSystem(RESPONSIBLE_HEALTH_DEPARTMENT_CODING_SYSTEM).setCode("1.");
-  }
-
-  private Optional<Composition> getComposition(Bundle bundle) {
-    Optional<Resource> first =
-        bundle.getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .filter(Composition.class::isInstance)
-            .findFirst();
-    return first.map(Composition.class::cast);
   }
 
   private void setReceptionTimeStamp(Composition composition) {

@@ -38,6 +38,7 @@ import de.gematik.demis.notification.builder.demis.fhir.notification.builder.rep
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBundleDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.StatisticInformationBedOccupancyDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.AddressDataBuilder;
+import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
 import de.gematik.demis.reportprocessingservice.connectors.hls.HospitalLocationServiceClient;
 import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiClient;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
@@ -57,6 +58,7 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -87,12 +89,14 @@ class ReportProcessingServiceIntegrationTest {
       UUID5Generator.generateType5UUID(REQUEST_ID).toString();
   private static final String IK_NUMBER = "987654321";
   private static final String AZP = "demis-test";
+  private static final String TOKEN = "Bearer test";
   @MockBean ValidationServiceClient validationServiceClient;
   @MockBean NotificationClearingApiClient notificationClearingApiClient;
   @MockBean PdfGenerationConnectionService pdfGenerationConnectionService;
   @MockBean HospitalLocationServiceClient hospitalLocationServiceClient;
   @Autowired private ReportProcessingService reportProcessingService;
   @Autowired private FhirContext fhirContext;
+  @Autowired private ContextEnrichmentService contextEnrichmentService;
 
   private static Response createResponse(final int status, final String content) {
     return Response.builder()
@@ -147,7 +151,7 @@ class ReportProcessingServiceIntegrationTest {
 
     String result =
         reportProcessingService
-            .process(body, contentType, REQUEST_ID, accept, IK_NUMBER, AZP)
+            .process(body, contentType, REQUEST_ID, accept, IK_NUMBER, AZP, TOKEN)
             .getBody();
 
     if (accept.isWildcardType()) {
@@ -212,7 +216,7 @@ class ReportProcessingServiceIntegrationTest {
 
     ResponseEntity<String> result =
         reportProcessingService.process(
-            body, APPLICATION_JSON, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP);
+            body, APPLICATION_JSON, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN);
 
     assertThat(result.getStatusCode().is4xxClientError()).isTrue();
     assertThat(result.getBody()).contains(operationOutcomeAsJson);
@@ -226,7 +230,7 @@ class ReportProcessingServiceIntegrationTest {
 
     final String result =
         reportProcessingService
-            .process(content, APPLICATION_JSON, REQUEST_ID, null, IK_NUMBER, AZP)
+            .process(content, APPLICATION_JSON, REQUEST_ID, null, IK_NUMBER, AZP, TOKEN)
             .getBody();
 
     final Parameters parameters =
@@ -241,7 +245,7 @@ class ReportProcessingServiceIntegrationTest {
     assertThatThrownBy(
             () ->
                 reportProcessingService.process(
-                    "", APPLICATION_ATOM_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP))
+                    "", APPLICATION_ATOM_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN))
         .isInstanceOf(RpsServiceException.class)
         .hasMessageContaining("bundle profile not supported or missing(pre-check).");
   }
@@ -251,28 +255,28 @@ class ReportProcessingServiceIntegrationTest {
 
     String content =
         """
-                    {
-                      "resourceType": "Bundle",
-                      "meta": {
-                        "profile": [
-                          "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
-                        ]
-                      },
-                      "entry": [
-                        {
-                          "resource": {
-                            "resourceType": "Composition",
-                            "identifier": {
-                              "value": "composition-identifier"
-                            }
-                          }
-                        }
-                      ]
-                    }""";
+            {
+              "resourceType": "Bundle",
+              "meta": {
+                "profile": [
+                  "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
+                ]
+              },
+              "entry": [
+                {
+                  "resource": {
+                    "resourceType": "Composition",
+                    "identifier": {
+                      "value": "composition-identifier"
+                    }
+                  }
+                }
+              ]
+            }""";
     assertThatThrownBy(
             () ->
                 reportProcessingService.process(
-                    content, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP))
+                    content, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN))
         .isInstanceOf(DataFormatException.class)
         .hasMessageContaining("Unexpected character '{' (code 123) in prolog; expected '<'");
   }
@@ -282,29 +286,29 @@ class ReportProcessingServiceIntegrationTest {
 
     String noBundle =
         """
-                    {
-                      "resourceType": "Patient",
-                      "meta": {
-                        "profile": [
-                          "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
-                        ]
-                      },
-                      "entry": [
-                        {
-                          "resource": {
-                            "resourceType": "Composition",
-                            "identifier": {
-                              "value": "composition-identifier"
-                            }
-                          }
-                        }
-                      ]
-                    }""";
+            {
+              "resourceType": "Patient",
+              "meta": {
+                "profile": [
+                  "https://demis.rki.de/fhir/StructureDefinition/ReportBundle"
+                ]
+              },
+              "entry": [
+                {
+                  "resource": {
+                    "resourceType": "Composition",
+                    "identifier": {
+                      "value": "composition-identifier"
+                    }
+                  }
+                }
+              ]
+            }""";
 
     assertThatThrownBy(
             () ->
                 reportProcessingService.process(
-                    noBundle, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP))
+                    noBundle, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN))
         .isInstanceOf(DataFormatException.class)
         .hasMessageContaining("Unexpected character '{' (code 123) in prolog;");
   }
@@ -322,7 +326,7 @@ class ReportProcessingServiceIntegrationTest {
     assertThatThrownBy(
             () ->
                 reportProcessingService.process(
-                    content, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP))
+                    content, APPLICATION_XML, REQUEST_ID, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN))
         .isInstanceOf(RpsServiceException.class)
         .hasMessage("bundle profile not supported or missing(pre-check).");
   }
@@ -330,7 +334,6 @@ class ReportProcessingServiceIntegrationTest {
   @Test
   void
       shouldCreateReceiptBundleWithReceivedBundleIdentifierAsExtensionAndChecktIdentifierIsOverwritten() {
-
     Address address =
         new AddressDataBuilder()
             .setPostalCode("10117")
@@ -348,19 +351,22 @@ class ReportProcessingServiceIntegrationTest {
             .buildExampleStatisticInformationBedOccupancy();
     Composition composition =
         new ReportBedOccupancyDataBuilder()
-            .setSubjectValue("987654")
-            .buildExampleReportBedOccupancy(practitioner, statisticData);
+            .setSubject(new Identifier().setValue("987654"))
+            .setStatisticInformationBedOccupancy(statisticData)
+            .setNotifierRole(practitioner)
+            .build();
     Bundle bundle =
         new ReportBundleDataBuilder()
             .setReportBedOccupancy(composition)
-            .setIdentifierValue("5b9a47fa-10c7-4277-b2ca-f12bf2a0a6f7")
             .setNotifierRole(practitioner)
-            .buildExampleReportBundle();
+            .setIdentifier(new Identifier().setValue("5b9a47fa-10c7-4277-b2ca-f12bf2a0a6f7"))
+            .setDefaults()
+            .build();
     String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
 
     ResponseEntity<String> responseEntity =
         reportProcessingService.process(
-            content, APPLICATION_JSON, null, APPLICATION_JSON, IK_NUMBER, AZP);
+            content, APPLICATION_JSON, null, APPLICATION_JSON, IK_NUMBER, AZP, TOKEN);
 
     List<String> expectedToBeContained =
         List.of("\"system\":\"https://demis.rki.de/fhir/NamingSystem/NotificationBundleId\"");

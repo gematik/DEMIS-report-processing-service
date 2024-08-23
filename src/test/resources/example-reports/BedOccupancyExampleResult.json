@@ -97,7 +97,7 @@
                   "telecom": [
                     {
                       "system": "email",
-                      "value": "demis@rki.de"
+                      "value": "demis-support@rki.de"
                     }
                   ]
                 }
@@ -119,7 +119,7 @@
               "telecom": [
                 {
                   "system": "email",
-                  "value": "demis@rki.de"
+                  "value": "demis-support@rki.de"
                 }
               ],
               "address": [

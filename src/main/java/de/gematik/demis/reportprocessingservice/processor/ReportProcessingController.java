@@ -19,6 +19,7 @@
 package de.gematik.demis.reportprocessingservice.processor;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @ConditionalOnProperty(name = "demis.idp.validate-jwt", havingValue = "false")
 public class ReportProcessingController {
+
   private static final String X_REQUEST_ID_HEADER = "X-Request-ID";
   private static final String IK_NUMBER_HEADER = "IK-Number";
   private static final String AZP_HEADER = "azp";
@@ -68,9 +70,10 @@ public class ReportProcessingController {
       @RequestHeader(name = ACCEPT, required = false) MediaType accept,
       @RequestHeader(value = X_REQUEST_ID_HEADER, required = false) String requestId,
       @RequestHeader(value = IK_NUMBER_HEADER, required = false) String ikNumber,
-      @RequestHeader(value = AZP_HEADER) String azp)
+      @RequestHeader(value = AZP_HEADER) String azp,
+      @RequestHeader(value = AUTHORIZATION, required = false) String authorization)
       throws ParsingException {
-
-    return reportProcessingService.process(content, mediaType, requestId, accept, ikNumber, azp);
+    return reportProcessingService.process(
+        content, mediaType, requestId, accept, ikNumber, azp, authorization);
   }
 }

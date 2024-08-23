@@ -21,13 +21,16 @@ package de.gematik.demis.reportprocessingservice.processor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.gematik.demis.fhirparserlibrary.FhirParser;
 import de.gematik.demis.fhirparserlibrary.ParsingException;
+import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
 import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationResult;
@@ -50,7 +53,10 @@ class ReportProcessingServiceTest {
 
   private static final String IK_NUMBER = "987654321";
   private static final String AZP = "demis-test";
+  private static final String TOKEN = "Bearer test";
   private ReportProcessingService reportProcessingService;
+  private Bundle bundle;
+  private String content;
 
   @Mock private ValidationServiceConnectionService validationServiceConnectionServiceMock;
 
@@ -65,6 +71,8 @@ class ReportProcessingServiceTest {
 
   @Mock private PdfGenerationConnectionService pdfGenerationConnectionService;
 
+  @Mock private ContextEnrichmentService contextEnrichmentService;
+
   FhirContext fhirContext = FhirContext.forR4Cached();
 
   @BeforeEach
@@ -76,23 +84,29 @@ class ReportProcessingServiceTest {
             hospitalLocationDataValidatorServiceMock,
             reportEnrichmentServiceMock,
             fhirParserService,
-            pdfGenerationConnectionService);
+            pdfGenerationConnectionService,
+            contextEnrichmentService);
+
     reportProcessingService.init();
+    bundle = TestObjects.bundles().minimalBundle();
+    content = fhirContext.newJsonParser().encodeResourceToString(bundle);
+    lenient()
+        .when(fhirParserService.parseBundleOrParameter(content, APPLICATION_JSON.getSubtype()))
+        .thenReturn(bundle);
+    lenient()
+        .when(fhirParserService.encode(any(), eq(APPLICATION_XML.getSubtype())))
+        .thenReturn("foobar2");
+    when(validationServiceConnectionServiceMock.validateBundle(any(), any()))
+        .thenReturn(new ValidationResult(true, new OperationOutcome()));
   }
 
   @Test
   void shouldCallParsingServiceForParseAndEncode() throws ParsingException {
-    Bundle bundle = TestObjects.bundles().minimalBundle();
-    String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
-
-    setupBundleIsValid();
-    when(fhirParserService.parseBundleOrParameter(content, APPLICATION_JSON.getSubtype()))
-        .thenReturn(bundle);
-    when(fhirParserService.encode(any(), eq(APPLICATION_XML.getSubtype()))).thenReturn("foobar2");
 
     String process =
         reportProcessingService
-            .process(content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP)
+            .process(
+                content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN)
             .getBody();
 
     assertThat(process).isEqualTo("foobar2");
@@ -100,17 +114,10 @@ class ReportProcessingServiceTest {
 
   @Test
   void shouldCallValidationServiceConnectionService() {
-    Bundle bundle = TestObjects.bundles().minimalBundle();
-    String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
-
-    setupBundleIsValid();
-    when(fhirParserService.parseBundleOrParameter(content, APPLICATION_JSON.getSubtype()))
-        .thenReturn(bundle);
-    when(fhirParserService.encode(any(), eq(APPLICATION_XML.getSubtype()))).thenReturn("foobar2");
-
     String process =
         reportProcessingService
-            .process(content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP)
+            .process(
+                content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN)
             .getBody();
 
     assertThat(process).isEqualTo("foobar2");
@@ -120,19 +127,14 @@ class ReportProcessingServiceTest {
 
   @Test
   void shouldReturnResponseEntityWithNotOk() {
-    Bundle bundle = TestObjects.bundles().minimalBundle();
-    String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
-
     OperationOutcome operationOutcome = new OperationOutcome();
     operationOutcome.setId("someId");
     when(validationServiceConnectionServiceMock.validateBundle(any(), any()))
         .thenReturn(new ValidationResult(false, operationOutcome));
-    when(fhirParserService.encode(operationOutcome, APPLICATION_XML.getSubtype()))
-        .thenReturn("foobar2");
 
     ResponseEntity<String> process =
         reportProcessingService.process(
-            content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP);
+            content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN);
 
     assertThat(process.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     assertThat(process.getBody()).isEqualTo("foobar2");
@@ -140,48 +142,26 @@ class ReportProcessingServiceTest {
 
   @Test
   void shouldCallEnrichmentService() throws ParsingException {
-    Bundle bundle = TestObjects.bundles().minimalBundle();
-    String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
-
-    setupBundleIsValid();
-    when(fhirParserService.parseBundleOrParameter(content, APPLICATION_JSON.getSubtype()))
-        .thenReturn(bundle);
-    when(fhirParserService.encode(any(), eq(APPLICATION_XML.getSubtype()))).thenReturn("foobar2");
 
     reportProcessingService.process(
-        content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP);
+        content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN);
 
     verify(reportEnrichmentServiceMock).enrichReportBundle(bundle, "request-id");
   }
 
   @Test
-  void shouldAddAllAvailableTokenValues() throws ParsingException {
-    reportProcessingService =
-        new ReportProcessingService(
-            validationServiceConnectionServiceMock,
-            notificationClearingApiConnectionServiceMock,
-            hospitalLocationDataValidatorServiceMock,
-            reportEnrichmentServiceMock,
-            fhirParserService,
-            pdfGenerationConnectionService);
-    reportProcessingService.init();
-
-    Bundle bundle = TestObjects.bundles().minimalBundle();
-    String content = fhirContext.newJsonParser().encodeResourceToString(bundle);
-
-    setupBundleIsValid();
-    when(fhirParserService.parseBundleOrParameter(content, APPLICATION_JSON.getSubtype()))
-        .thenReturn(bundle);
-    when(fhirParserService.encode(any(), eq(APPLICATION_XML.getSubtype()))).thenReturn("foobar2");
-
+  void shouldCallContextEnrichmentService() throws ParsingException {
     reportProcessingService.process(
-        content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP);
+        content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN);
 
-    verify(reportEnrichmentServiceMock).enrichReportBundle(bundle, "request-id");
+    verify(contextEnrichmentService).enrichBundleWithContextInformation(bundle, TOKEN);
   }
 
-  private void setupBundleIsValid() {
-    when(validationServiceConnectionServiceMock.validateBundle(any(), any()))
-        .thenReturn(new ValidationResult(true, new OperationOutcome()));
+  @Test
+  void shouldAddAllAvailableTokenValues() throws ParsingException {
+    reportProcessingService.process(
+        content, APPLICATION_JSON, "request-id", APPLICATION_XML, IK_NUMBER, AZP, TOKEN);
+
+    verify(reportEnrichmentServiceMock).enrichReportBundle(bundle, "request-id");
   }
 }

@@ -20,11 +20,11 @@ package de.gematik.demis.reportprocessingservice.processor;
 
 import static de.gematik.demis.reportprocessingservice.internal.OperationOutcomeUtils.producePositiveOutcomeWithNoErrors;
 import static de.gematik.demis.reportprocessingservice.utils.ErrorCode.PROFILE_NOT_SUPPORTED;
-import static java.lang.String.format;
 
 import de.gematik.demis.fhirparserlibrary.FhirParser;
 import de.gematik.demis.fhirparserlibrary.ParsingException;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.receipt.ReceiptBuilder;
+import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
 import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationResult;
@@ -37,6 +37,7 @@ import jakarta.annotation.PostConstruct;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -49,7 +50,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ReportProcessingService {
+
   public static final String HTTPS_DEMIS_RKI_DE_FHIR_STRUCTURE_DEFINITION_REPORT_BUNDLE =
       "https://demis.rki.de/fhir/StructureDefinition/ReportBundle";
 
@@ -59,24 +62,9 @@ public class ReportProcessingService {
   private final ReportEnrichmentService reportEnrichmentService;
   private final FhirParser fhirParserService;
   private final PdfGenerationConnectionService pdfGenerationConnectionService;
+  private final ContextEnrichmentService contextEnrichmentService;
 
   private Pattern pattern;
-
-  public ReportProcessingService(
-      ValidationServiceConnectionService validationServiceConnectionService,
-      NotificationClearingApiConnectionService notificationClearingApiConnectionService,
-      HospitalLocationDataValidatorService hospitalLocationDataValidatorService,
-      ReportEnrichmentService reportEnrichmentService,
-      FhirParser fhirParserService,
-      PdfGenerationConnectionService pdfGenerationConnectionService) {
-
-    this.validationServiceConnectionService = validationServiceConnectionService;
-    this.notificationClearingApiConnectionService = notificationClearingApiConnectionService;
-    this.hospitalLocationDataValidatorService = hospitalLocationDataValidatorService;
-    this.reportEnrichmentService = reportEnrichmentService;
-    this.fhirParserService = fhirParserService;
-    this.pdfGenerationConnectionService = pdfGenerationConnectionService;
-  }
 
   @PostConstruct
   void init() {
@@ -97,7 +85,8 @@ public class ReportProcessingService {
       String requestId,
       MediaType accept,
       String ikNumber,
-      String azp)
+      String azp,
+      String authorization)
       throws ParsingException {
 
     preCheckProfile(content);
@@ -129,15 +118,18 @@ public class ReportProcessingService {
     Optional<Binary> pdf =
         pdfGenerationConnectionService.generateBedOccupancyReceipt(bundle, requestId);
 
-    // 5. NCAPI extern
+    // 5. Bundle Enrichment (Context Enrichment Service) intern
+    contextEnrichmentService.enrichBundleWithContextInformation(bundle, authorization);
+
+    // 6. NCAPI extern
     notificationClearingApiConnectionService.sendReportBundleToNCAPI(bundle);
 
     Parameters returnParameters =
         createReturnValue(bundle, pdf, validationResult.operationOutcome());
 
     String result = fhirParserService.encode(returnParameters, accept.getSubtype());
-    log.info(format("processing of bundle %s completed", bundle.getId()));
-    log.debug(format("response bundle: %s", result));
+    log.info("bundleId={}, sender={}, status=ok", bundle.getId(), azp);
+    log.debug("response bundle: {}", result);
     return ResponseEntity.ok().contentType(accept).body(result);
   }
 
