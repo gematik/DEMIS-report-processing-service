@@ -29,4 +29,6 @@ public class Constants {
   public static final String UNSUPPORTED_RESOURCE_BUNDLE = "Unsupported resource bundle";
 
   public static final String ALL_OK = "All OK";
+
+  public static final String PROFILE_BASE_URL = "https://demis.rki.de/fhir/";
 }

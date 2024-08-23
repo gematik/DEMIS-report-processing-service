@@ -15,7 +15,7 @@ required:
     repository: europe-west3-docker.pkg.dev/gematik-all-infra-prod/demis-dev
     # The name of the image
     name: report-processing-service
-    # Overrides the image tag whose default is the chart appVersion. 
+    # Overrides the image tag whose default is the chart appVersion.
     # If not given, the Chart AppVersion will be used
     tag: null
 
@@ -37,7 +37,7 @@ config:
 # If not given, the Entrypoint defined in Dockerfile will be used
 application:
   entrypoint: ["java"]
-  parameters: ["-XX:ActiveProcessorCount=2", "-XX:MaxRAMPercentage=95.0", "-XX:+TieredCompilation", "-XX:+UseSerialGC", "-jar", "-Xmx1G", "/app.jar"]
+  parameters: ["-XX:ActiveProcessorCount=2", "-XX:MaxRAMPercentage=95.0", "-XX:+TieredCompilation", "-XX:+UseSerialGC", "-jar", "/app.jar"]
 
 # Extra Labels to be added
 # E.g.
@@ -49,13 +49,7 @@ customLabels: {}
 deploymentLabels: {}
 
 # Environment Variables to be defined
-customEnvVars: 
-  DEMIS_IDP_PUBLIC_KEY_LOCATION: "http://keycloak:8080/realms/HOSPITAL/protocol/openid-connect/certs"
-  DEMIS_NETWORK_VALIDATION_SERVICE_ADDRESS: "http://validation-service:8080"
-  DEMIS_NETWORK_NOTIFICATION_CLEARING_API_ADDRESS: "http://notification-clearing-api:8080/notification-clearing-api/fhir"
-  DEMIS_NETWORK_HOSPITAL_LOCATION_SERVICE_ADDRESS: "http://hospital-location-service:8080"
-  DEMIS_NETWORK_PDFGEN_SERVICE_ADDRESS: "http://pdfgen-service:8080"
-  HLS_VALIDATION_GATEWAY_VALUE: "demis-gateway"
+customEnvVars:
   DEMIS_IDP_VALIDATE_JWT: "true"
 
 # Define Image Pull Secrets if using private registry
@@ -79,7 +73,7 @@ annotations: {}
 podAnnotations: {}
 
 # Pod Security Context - applies to all containers in a Pod
-podSecurityContext: 
+podSecurityContext:
   # The GID to tell the Kubelet to modify permissions of a volume owned by a pod
   fsGroup: 10000
   # Determines when to apply fsGroup actions - "Always" is the default
@@ -100,7 +94,7 @@ securityContext:
   #Usually no longer required. Determines whether /proc is masked to the container. Do not mount /proc from a host to a container
   procMount: Default
   # The SELinux context to be applied to the container. Must not be explicitly set to Unconfined.
-  seccompProfile: 
+  seccompProfile:
     type: "RuntimeDefault"
   #Which GID container process is assigned
   runAsGroup: 10000
@@ -112,7 +106,7 @@ securityContext:
   readOnlyRootFilesystem: true
   #Ability to remove and /or add Linux Capabilities
   capabilities:
-    drop: 
+    drop:
     - all
 
 service:
@@ -121,7 +115,7 @@ service:
     http: 8080
 
 # Default Resources
-resources: 
+resources:
   limits:
     cpu: "1000m"
     memory: "1Gi"
@@ -139,8 +133,6 @@ autoscaling:
 nodeSelector: {}
 
 tolerations: []
-
-affinity: {}
 
 istio:
   enable: false

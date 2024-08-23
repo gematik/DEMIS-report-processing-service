@@ -19,6 +19,7 @@
 package de.gematik.demis.reportprocessingservice.processor;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
@@ -69,7 +70,8 @@ public class SecuredReportProcessingController {
       @RequestBody @NotBlank String content,
       @RequestHeader(CONTENT_TYPE) MediaType mediaType,
       @RequestHeader(name = ACCEPT, required = false) MediaType accept,
-      @RequestHeader(value = X_REQUEST_ID_HEADER, required = false) String requestId)
+      @RequestHeader(value = X_REQUEST_ID_HEADER, required = false) String requestId,
+      @RequestHeader(value = AUTHORIZATION, required = false) String authorization)
       throws ParsingException {
 
     return reportProcessingService.process(
@@ -78,7 +80,8 @@ public class SecuredReportProcessingController {
         requestId,
         accept,
         determineIkNumberFromToken(authentication),
-        determineAzpFromToken(authentication));
+        determineAzpFromToken(authentication),
+        authorization);
   }
 
   private String determineIkNumberFromToken(Authentication authentication) {

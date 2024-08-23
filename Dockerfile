@@ -1,10 +1,10 @@
 # Declare Source Digest for the Base Image
-ARG SOURCE_DIGEST=f153dfdd10e9846963676aa6ea8b8630f150a63c8e5fe127c93e98eb10b86766
-FROM eclipse-temurin:21.0.2_13-jre-alpine@sha256:${SOURCE_DIGEST}
+ARG SOURCE_DIGEST=3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
+FROM eclipse-temurin:21.0.4_7-jre-alpine@sha256:${SOURCE_DIGEST}
 
 # Redeclare Source Digest to be used in the build context 
 # https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
-ARG SOURCE_DIGEST=f153dfdd10e9846963676aa6ea8b8630f150a63c8e5fe127c93e98eb10b86766
+ARG SOURCE_DIGEST=3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
 
 # The STOPSIGNAL instruction sets the system call signal that will be sent to the container to exit
 # SIGTERM = 15 - https://de.wikipedia.org/wiki/Signal_(Unix)

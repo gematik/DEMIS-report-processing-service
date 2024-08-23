@@ -126,10 +126,12 @@ class HospitalLocationDataValidatorServiceTest {
             .buildExampleStatisticInformationBedOccupancy();
     Composition composition =
         new ReportBedOccupancyDataBuilder()
-            .setSubjectValue("987654")
-            .buildExampleReportBedOccupancy(notifierRole, statistic);
+            .setSubject(new Identifier().setValue("987654"))
+            .setNotifierRole(notifierRole)
+            .setStatisticInformationBedOccupancy(statistic)
+            .build();
     reportBundleDataBuilder.setReportBedOccupancy(composition);
     reportBundleDataBuilder.setStatisticInformationBedOccupancy(statistic);
-    return reportBundleDataBuilder.buildExampleReportBundle();
+    return reportBundleDataBuilder.build();
   }
 }
