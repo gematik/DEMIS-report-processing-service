@@ -29,8 +29,7 @@ This project includes:
   Apache HttpComponents Core HTTP/2 under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache-2.0
-  Apache Log4j to SLF4J Adapter under Apache-2.0
-  Apache Velocity - Engine under Apache License, Version 2.0
+  Apache Velocity - Engine under Apache-2.0
   Apache Velocity - JSR 223 Scripting under Apache License, Version 2.0
   Apache Velocity Tools - Generic tools under Apache License, Version 2.0
   asm under BSD-3-Clause
@@ -103,6 +102,7 @@ This project includes:
   JSON.simple under The Apache Software License, Version 2.0
   JSONassert under The Apache Software License, Version 2.0
   JsonSchemaValidator under Apache License Version 2.0
+  JSpecify annotations under The Apache License, Version 2.0
   JUL to SLF4J bridge under MIT License
   JUnit Jupiter (Aggregator) under Eclipse Public License v2.0
   JUnit Jupiter API under Eclipse Public License v2.0
@@ -113,6 +113,7 @@ This project includes:
   JZlib under BSD
   LatencyUtils under Public Domain, per Creative Commons CC0
   libphonenumber under The Apache Software License, Version 2.0
+  Log4j API to SLF4J Adapter under Apache-2.0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logstash Logback Encoder under Apache License, Version 2.0 or MIT License
@@ -168,7 +169,7 @@ This project includes:
   OpenTelemetry Java under The Apache License, Version 2.0
   OpenTelemetry Semantic Conventions Java under The Apache License, Version 2.0
   org.apiguardian:apiguardian-api under The Apache License, Version 2.0
-  org.eclipse.sisu.inject under Eclipse Public License, Version 1.0
+  org.eclipse.sisu.inject under Eclipse Public License, Version 2.0
   org.hl7.fhir.r4 under Apache Software License 2.0
   org.hl7.fhir.utilities under Apache Software License 2.0
   org.opentest4j:opentest4j under The Apache License, Version 2.0
@@ -186,13 +187,13 @@ This project includes:
   Prometheus Metrics Config under The Apache Software License, Version 2.0
   Prometheus Metrics Core under The Apache Software License, Version 2.0
   Prometheus Metrics Exposition Formats under The Apache Software License, Version 2.0
+  Prometheus Metrics Exposition Text Formats under The Apache Software License, Version 2.0
   Prometheus Metrics Model under The Apache Software License, Version 2.0
   Prometheus Metrics Tracer Common under The Apache Software License, Version 2.0
   reactive-streams under MIT-0
   Reactor Extra under Apache License, Version 2.0
   report-processing-service under Licensed under the EUPL 1.2
   service-base under Licensed under the EUPL 1.2
-  Shaded Protobuf under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Spring AOP under Apache License, Version 2.0
@@ -239,7 +240,6 @@ This project includes:
   spring-security-oauth2-core under Apache License, Version 2.0
   spring-security-oauth2-jose under Apache License, Version 2.0
   spring-security-oauth2-resource-server under Apache License, Version 2.0
-  spring-security-rsa under Apache 2.0
   spring-security-test under Apache License, Version 2.0
   spring-security-web under Apache License, Version 2.0
   springdoc-openapi-starter-common under The Apache License, Version 2.0
@@ -261,6 +261,7 @@ This project includes:
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   uri-template under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
+  webjars-locator-lite under MIT
   WireMock under The Apache Software License, Version 2.0
   Woodstox under The Apache License, Version 2.0
 

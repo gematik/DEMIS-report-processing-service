@@ -4,7 +4,6 @@ service:
   ports:
     http: 8080
 istio:
-  enable: true
   virtualService:
     gateways: {}
     http:
@@ -13,12 +12,12 @@ istio:
             prefix: /reports/fhir/
       rewrite:
         uri: /
-#      timeout: 15s
+      timeout: null
       retries:
         enable: false
 #        attempts: 3
 #        perTryTimeout: 5s
-#        retryOn: 503
+        retryOn: null
     hosts: {}
   subsets:
     main:
