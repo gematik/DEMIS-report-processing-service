@@ -83,7 +83,7 @@ mvn clean install
 build with docker image:
 
 ```docker
-docker build --build-arg https_proxy=http://192.168.110.10:3128 --build-arg http_proxy=http://192.168.110.10:3128 -t report-processing-service:latest .
+docker build -t report-processing-service:latest .
 ```
 The Docker Image associated to the service can be built alternatively with the extra profile `docker`:
 
