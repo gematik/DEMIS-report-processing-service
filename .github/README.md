@@ -83,7 +83,7 @@ mvn clean install
 build with docker image:
 
 ```docker
-docker build --build-arg https_proxy=http://192.168.110.10:3128 --build-arg http_proxy=http://192.168.110.10:3128 -t europe-west3-docker.pkg.dev/gematik-all-infra-prod/demis-dev/report-processing-service:latest .
+docker build --build-arg https_proxy=http://192.168.110.10:3128 --build-arg http_proxy=http://192.168.110.10:3128 -t report-processing-service:latest .
 ```
 The Docker Image associated to the service can be built alternatively with the extra profile `docker`:
 
@@ -107,7 +107,7 @@ The application can be executed from a mvn command file or a Docker Image:
 mvn clean spring-boot:run`
 Check the server with: `curl -v localhost:8080/status`
 # As Docker Image
-docker run -p 8081:8081 -dt --name rps-container europe-west3-docker.pkg.dev/gematik-all-infra-prod/demis-dev/report-processing-service:latest` or add to a yaml file from e.g. [this project](https://gitlab.prod.ccs.gematik.solutions/git/demis/demis
+docker run -p 8081:8081 -dt --name rps-container report-processing-service:latest` or add to a yaml file from e.g. [this project](https://gitlab.prod.ccs.gematik.solutions/git/demis/demis
 ```
 
 ### Endpoints

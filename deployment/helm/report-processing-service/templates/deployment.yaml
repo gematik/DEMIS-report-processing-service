@@ -2,8 +2,7 @@
 {{- $dockerRepository := .Values.required.image.repository | required ".Values.required.image.repository is required." -}}
 {{- $dockerImage := .Values.required.image.name | required ".Values.required.image.name is required." -}}
 {{- $dockerTag := .Values.required.image.tag | default .Chart.AppVersion -}}
-{{- $defaultSecretName := (include "report-processing-service.defaultSecretName" .) -}}
-{{- $secretApiKeyName := (include "report-processing-service.apiKeySecretName" .) -}}
+{{- $secretApiKeyName := .Values.config.secret.api.name | required ".Values.config.secret.api.name is required" -}}
 {{- $secretApiKeyEntry := .Values.config.secret.api.key -}}
 {{- $customEnvVars := .Values.customEnvVars -}}
 apiVersion: apps/v1
@@ -48,29 +47,18 @@ spec:
         - name: jfr-volume
           emptyDir: {}
         {{- end }}
-        {{- if .Values.config.secret.useDefault }}
-        - name: "default-secret-volume"
-          secret:
-            secretName: {{ include "report-processing-service.defaultSecretName" . }}
-            items:
-            - key: NCS_APIKEY
-              path: ncs/apikey
-        {{- end }}
-        {{- if and (not .Values.config.secret.useDefault) ($secretApiKeyName) }}
         - name: api-key-secret-volume
           secret:
             secretName: {{ $secretApiKeyName }}
             items:
             - key: {{ $secretApiKeyEntry }}
               path: ncs/apikey
-        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ $dockerRepository }}/{{ $dockerImage }}:{{ $dockerTag }}"
-          {{- /* Pull always an image if is tagged as "latest" */}}
-          imagePullPolicy: {{- if eq .Values.required.image.tag "latest" }} "Always" {{else}} "IfNotPresent" {{- end -}}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           {{- /* If entrypoint and parameters are both defined, configure them */ -}}
           {{- if .Values.application.entrypoint }}
           {{- if .Values.application.parameters }}
@@ -83,12 +71,6 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- end }}
-          {{- end }}
-          {{- if .Values.config.secret.useDefault }}
-          # Mount Default Secret entries as environment variables
-          envFrom:
-            - secretRef:
-                name: {{ $defaultSecretName | quote }}
           {{- end }}
           # Set the Environment Variables for the container
           env:
@@ -114,13 +96,8 @@ spec:
             {{- end }}
             {{- end }}
             # Set Spring Configuration Import from Folder Structure
-            {{- if .Values.config.secret.useDefault }}
-            - name: "SPRING_CONFIG_IMPORT"
-              value: "optional:configtree:{{ include "report-processing-service.secretMountPath" . }}/default/"
-            {{- else }}
             - name: "SPRING_CONFIG_IMPORT"
               value: "optional:configtree:{{ include "report-processing-service.secretMountPath" . }}/api/"
-            {{- end }}
           # Mount Volumes in container
           volumeMounts:
             - name: tmp-volume
@@ -129,17 +106,9 @@ spec:
             - name: jfr-volume
               mountPath: /jfrdump
             {{- end }}
-            {{- if .Values.config.secret.useDefault }}
-            # Mount default secret as volume
-            - name: default-secret-volume
-              readOnly: true
-              mountPath: "{{ include "report-processing-service.secretMountPath" . }}/default"
-            {{- end }}
-            {{- if and (not .Values.config.secret.useDefault) ($secretApiKeyName) }}
             - name: api-key-secret-volume
               readOnly: true
               mountPath: "{{ include "report-processing-service.secretMountPath" . }}/api"
-            {{- end }}
           # Ports to be exposed from the container
           ports:
             - name: rps-port
@@ -172,9 +141,11 @@ spec:
               port: rps-port
             failureThreshold: 5
             periodSeconds: 10
+          {{- with .Values.resources }}
           # Define Limits and Requested Resources (CPU/RAM)
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

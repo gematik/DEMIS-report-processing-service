@@ -18,6 +18,28 @@
 
 package de.gematik.demis.reportprocessingservice.internal;
 
+/*-
+ * #%L
+ * report-processing-service
+ * %%
+ * Copyright (C) 2025 gematik GmbH
+ * %%
+ * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the
+ * European Commission – subsequent versions of the EUPL (the "Licence").
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You find a copy of the Licence in the "Licence" file or at
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
+ * In case of changes by gematik find details in the "Readme" file.
+ *
+ * See the Licence for the specific language governing permissions and limitations under the Licence.
+ * #L%
+ */
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -41,7 +63,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HospitalLocationDataValidatorServiceTest {
 
-  public static final String DEMIS_GATEWAY_VALUE = "demis-gateway";
   private static final String IK_NUMBER = "987654321";
   @InjectMocks private HospitalLocationDataValidatorService hospitalLocationDataValidatorService;
   @Mock private HospitalLocationConnectionService hospitalLocationConnectionServiceMock;
@@ -49,12 +70,11 @@ class HospitalLocationDataValidatorServiceTest {
   @BeforeEach
   void setUp() {
     hospitalLocationDataValidatorService =
-        new HospitalLocationDataValidatorService(
-            "demis-test", hospitalLocationConnectionServiceMock);
+        new HospitalLocationDataValidatorService(hospitalLocationConnectionServiceMock);
   }
 
   @Test
-  void shouldCallHospitallOcationConnectionService() {
+  void shouldCallHospitalLocationConnectionService() {
 
     Bundle bundle = createBundleWithSpecificAddress();
 
@@ -62,9 +82,7 @@ class HospitalLocationDataValidatorServiceTest {
         .thenReturn(Collections.emptyList());
 
     assertThatThrownBy(
-            () ->
-                hospitalLocationDataValidatorService.validateLocationData(
-                    IK_NUMBER, DEMIS_GATEWAY_VALUE, bundle))
+            () -> hospitalLocationDataValidatorService.validateLocationData(IK_NUMBER, bundle))
         .isInstanceOf(HospitalLocationValidationException.class);
 
     verify(hospitalLocationConnectionServiceMock).getHospitalData(IK_NUMBER);
@@ -78,9 +96,7 @@ class HospitalLocationDataValidatorServiceTest {
         .thenReturn(Collections.emptyList());
 
     assertThatThrownBy(
-            () ->
-                hospitalLocationDataValidatorService.validateLocationData(
-                    IK_NUMBER, DEMIS_GATEWAY_VALUE, bundle))
+            () -> hospitalLocationDataValidatorService.validateLocationData(IK_NUMBER, bundle))
         .isInstanceOf(HospitalLocationValidationException.class)
         .hasMessage("Validation Exception (for id 987654 no InEK data found)");
   }
@@ -91,18 +107,9 @@ class HospitalLocationDataValidatorServiceTest {
     bundle.addEntry(new Bundle.BundleEntryComponent().setResource(new Practitioner()));
 
     assertThatThrownBy(
-            () ->
-                hospitalLocationDataValidatorService.validateLocationData(
-                    IK_NUMBER, DEMIS_GATEWAY_VALUE, bundle))
+            () -> hospitalLocationDataValidatorService.validateLocationData(IK_NUMBER, bundle))
         .isInstanceOf(InternalException.class)
         .hasMessage("Internal Error (Error-ID-RPS-001)");
-  }
-
-  @Test
-  void shouldReturnAndDoNothingIfGatewayIdEqualsProperty() {
-    Bundle bundle = new Bundle();
-
-    hospitalLocationDataValidatorService.validateLocationData(IK_NUMBER, "demis-test", bundle);
   }
 
   @Test
@@ -113,8 +120,7 @@ class HospitalLocationDataValidatorServiceTest {
     when(hospitalLocationConnectionServiceMock.getHospitalData(any()))
         .thenReturn(Collections.singletonList(location));
 
-    hospitalLocationDataValidatorService.validateLocationData(
-        IK_NUMBER, DEMIS_GATEWAY_VALUE, bundle);
+    hospitalLocationDataValidatorService.validateLocationData(IK_NUMBER, bundle);
   }
 
   private Bundle createBundleWithSpecificAddress() {

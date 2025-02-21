@@ -2,6 +2,13 @@
 
 # Release notes
 
+## Release 1.6.7 (2025-02-21)
+
+- Update:
+  - Dependency-Updates (CVEs et al.)
+  - Extended logging
+  - Add context-informations (provenance) before pdf will be generated
+
 ## Release 1.5.3 (2024-04-04)
 
 - first official GitHub-Release

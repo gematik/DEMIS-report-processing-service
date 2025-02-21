@@ -91,23 +91,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Get Default Secret name 
-*/}}
-{{- define "report-processing-service.defaultSecretName" -}}
-{{- print "secret-" (include "report-processing-service.fullversionname" .) }}
-{{- end }}
-
-{{/*
-Get API Keys Secret name from Values
-*/}}
-{{- define "report-processing-service.apiKeySecretName" -}}
-{{- if and (not .Values.config.secret.api.name) (not .Values.config.secret.useDefault) }}
-{{- fail ".Values.config.secret.api.name is required" }}
-{{- end }}
-{{- print .Values.config.secret.api.name }}
-{{- end }}
-
-{{/*
 Get Default MountPath for Secrets
 */}}
 {{- define "report-processing-service.secretMountPath" -}}

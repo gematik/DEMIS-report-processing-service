@@ -4,11 +4,11 @@
   <parent>
     <groupId>de.gematik.demis</groupId>
     <artifactId>spring-parent</artifactId>
-    <version>2.2.4</version>
+    <version>2.5.2</version>
     <relativePath></relativePath><!-- lookup parent from repository -->
   </parent>
   <artifactId>report-processing-service</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.7-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>report-processing-service</name>
   <description>Processing service for report notifications for DEMIS</description>
@@ -20,43 +20,27 @@
   </licenses>
   <properties>
     <java.version>21</java.version>
-    <springCloud.version>4.1.4</springCloud.version>
-    <notification-builder-library.version>3.2.2</notification-builder-library.version>
+    <springCloud.version>4.2.0</springCloud.version>
     <sonar.exclusions>**/de/gematik/demis/reportprocessingservice/ReportProcessingServiceApplication.java,
             **/de/gematik/demis/reportprocessingservice/exceptions/ParsingException.java</sonar.exclusions>
-    <junit-jupiter-api.version>5.11.0</junit-jupiter-api.version>
+    <junit-jupiter-api.version>5.11.4</junit-jupiter-api.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.12.0</version>
+        <version>1.13.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.3.0-jre</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.16.1</version>
+        <version>33.4.0-jre</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.woodstox</groupId>
         <artifactId>stax2-api</artifactId>
         <version>4.2.2</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-core</artifactId>
-        <version>6.3.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-config</artifactId>
-        <version>6.3.3</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -112,7 +96,6 @@
     <dependency>
       <groupId>de.gematik.demis</groupId>
       <artifactId>notification-builder-library</artifactId>
-      <version>${notification-builder-library.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-fileupload</groupId>
@@ -122,13 +105,13 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>1.78.1</version>
+      <version>1.79</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.78.1</version>
+      <version>1.80</version>
       <scope>test</scope>
     </dependency>
     <dependency>

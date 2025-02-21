@@ -68,9 +68,9 @@ rewrite:
 Detect if the external timeout is defined
 */}}
 {{- define "istio.service.external.timeout" -}}
-{{- if (and (hasKey .Values.istio.virtualService "externalHttp") (hasKey .Values.istio.virtualService.externalHttp "timeout")) -}}
+{{- if (and (hasKey .Values.istio.virtualService "externalHttp") (.Values.istio.virtualService.externalHttp.timeout)) -}}
 timeout: {{ printf "%s" .Values.istio.virtualService.externalHttp.timeout }}
-{{- else if (and (hasKey .Values.istio.virtualService "http") (hasKey .Values.istio.virtualService.http "timeout")) -}}
+{{- else if (and (hasKey .Values.istio.virtualService "http") (.Values.istio.virtualService.http.timeout)) -}}
 timeout: {{ printf "%s" .Values.istio.virtualService.http.timeout }}
 {{- end -}}
 {{- end -}}

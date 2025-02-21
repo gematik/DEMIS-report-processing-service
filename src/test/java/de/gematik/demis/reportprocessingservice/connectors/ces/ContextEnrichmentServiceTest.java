@@ -18,6 +18,28 @@
 
 package de.gematik.demis.reportprocessingservice.connectors.ces;
 
+/*-
+ * #%L
+ * report-processing-service
+ * %%
+ * Copyright (C) 2025 gematik GmbH
+ * %%
+ * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the
+ * European Commission – subsequent versions of the EUPL (the "Licence").
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You find a copy of the Licence in the "Licence" file or at
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
+ * In case of changes by gematik find details in the "Readme" file.
+ *
+ * See the Licence for the specific language governing permissions and limitations under the Licence.
+ * #L%
+ */
+
 import static de.gematik.demis.reportprocessingservice.objects.TestObjects.bundles;
 import static de.gematik.demis.reportprocessingservice.testobjects.TestObjects.PROVENANCE_RESOURCE;
 import static de.gematik.demis.reportprocessingservice.testobjects.TestUtils.getJsonParser;
@@ -68,26 +90,9 @@ class ContextEnrichmentServiceTest {
   }
 
   @Test
-  @DisplayName("Test that if enrichment flag is disabled, the bundle is not modified")
-  void testEnrichmentFlagDisabledAndReturnSameBundle() {
-    String bundleString = getJsonParser().encodeToString(bundle);
-    underTest.enrichBundleWithContextInformation(bundle, TOKEN);
-    assertThat(getJsonParser().encodeToString(bundle)).isEqualTo(bundleString);
-  }
-
-  @Test
-  @DisplayName(
-      "Test that if enrichment flag is disabled, bundleOperationService doesn't got called")
-  void testEnrichmentFlagDisabledAndContextEnrichmentServiceClientNotCalled() {
-    underTest.enrichBundleWithContextInformation(bundle, TOKEN);
-    verifyNoInteractions(bundleOperationService);
-  }
-
-  @Test
   @DisplayName(
       "Test that if enrichment flag is enabled and authorization is null, contextEnrichmentServiceClient and bundleOperationService don't got called")
   void testShouldNotInteractWithClientIfAuthorizationIsNotSet() {
-    underTest.setEnrichment(true);
     underTest.enrichBundleWithContextInformation(bundle, null);
     verifyNoInteractions(bundleOperationService);
     verifyNoInteractions(contextEnrichmentServiceClient);
@@ -97,7 +102,6 @@ class ContextEnrichmentServiceTest {
   @DisplayName(
       "Test that if enrichment flag is enabled, the bundle is not modified if bundleOperationService can not find composition and clientEnrichmentServiceClient does not get called")
   void testBundleDoesNotGetModifiedIfBundleOperationServiceCanNotFindComposition() {
-    underTest.setEnrichment(true);
     when(bundleOperationService.getComposition(bundle)).thenReturn(Optional.empty());
     underTest.enrichBundleWithContextInformation(bundle, TOKEN);
     verifyNoInteractions(contextEnrichmentServiceClient);
@@ -107,7 +111,6 @@ class ContextEnrichmentServiceTest {
   @DisplayName(
       "Test that if enrichment flag is enabled, fhirParser is not called if client throws an error")
   void testFhirParserDoesNotGetCalledIfClientError() {
-    underTest.setEnrichment(true);
     when(bundleOperationService.getComposition(bundle)).thenReturn(getComposition(bundle));
     when(contextEnrichmentServiceClient.getProvenanceResource(any(), any()))
         .thenThrow(new RuntimeException("Some error"));
@@ -119,7 +122,6 @@ class ContextEnrichmentServiceTest {
   @DisplayName(
       "Test that if enrichment flag is enabled, the bundle have not been changed if client throws an error")
   void testIfTheSameBundleIsReturnedAsFallbackWhenClientError() {
-    underTest.setEnrichment(true);
     String bundleString = getJsonParser().encodeToString(bundle);
     when(bundleOperationService.getComposition(bundle)).thenReturn(getComposition(bundle));
     when(contextEnrichmentServiceClient.getProvenanceResource(any(), any()))
@@ -132,7 +134,6 @@ class ContextEnrichmentServiceTest {
   @DisplayName(
       "Test that if enrichment flag is enabled, the bundle have not been changed if the contextEnrichmentServiceClient returns invalid data")
   void testIfTheSameBundleIsReturnedAsFallbackWhenBundleHaveNoProvenance() {
-    underTest.setEnrichment(true);
     String bundleString = getJsonParser().encodeToString(bundle);
     when(bundleOperationService.getComposition(bundle)).thenReturn(getComposition(bundle));
     when(contextEnrichmentServiceClient.getProvenanceResource(any(), any()))
@@ -148,13 +149,12 @@ class ContextEnrichmentServiceTest {
   @DisplayName("Test that if enrichment flag is enabled, the bundle enriched correctly")
   void testProvenanceGotAppendCorrectly() {
     String response = "changedBundle";
-    underTest.setEnrichment(true);
     Provenance provenance =
         getJsonParser()
             .parseResource(Provenance.class, TestObjects.readResourceAsString(PROVENANCE_RESOURCE));
     when(bundleOperationService.getComposition(bundle)).thenReturn(getComposition(bundle));
     when(contextEnrichmentServiceClient.getProvenanceResource(
-            TOKEN, getComposition(bundle).get().getId()))
+            TOKEN, getComposition(bundle).orElseThrow().getIdPart()))
         .thenReturn(response);
     when(fhirParser.parseFromJson(eq(response))).thenReturn(provenance);
 
