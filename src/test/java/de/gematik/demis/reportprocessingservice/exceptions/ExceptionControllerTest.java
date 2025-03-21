@@ -1,21 +1,3 @@
-/*
- * Copyright [2024], gematik GmbH
- *
- * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the
- * European Commission – subsequent versions of the EUPL (the "Licence").
- * You may not use this work except in compliance with the Licence.
- *
- * You find a copy of the Licence in the "Licence" file or at
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
- * In case of changes by gematik find details in the "Readme" file.
- *
- * See the Licence for the specific language governing permissions and limitations under the Licence.
- */
-
 package de.gematik.demis.reportprocessingservice.exceptions;
 
 /*-
@@ -55,7 +37,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -79,26 +60,6 @@ class ExceptionControllerTest {
           exceptionControllerUnderTest.handleBadRequestException(exception, request);
 
       assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
-      assertThat(result.getBody())
-          .isEqualTo(
-              "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"exception\",\"diagnostics\":\"94709a92-ee29-4b85-99a0-e9c8dd2afd3d: localizedMessage\"}]}");
-    }
-  }
-
-  @DisplayName("Test forbidden responses for access denied exceptions")
-  @Test
-  void testHandleAccessDeniedException() {
-    try (MockedStatic<Utils> utilities = Mockito.mockStatic(Utils.class)) {
-      utilities.when(Utils::generateUuidString).thenReturn("94709a92-ee29-4b85-99a0-e9c8dd2afd3d");
-
-      final AccessDeniedException exception = mock(AccessDeniedException.class);
-      when(exception.getLocalizedMessage()).thenReturn("localizedMessage");
-      final HttpServletRequest request = mock(HttpServletRequest.class);
-
-      final ResponseEntity<String> result =
-          exceptionControllerUnderTest.handleAccessDeniedException(exception, request);
-
-      assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(403));
       assertThat(result.getBody())
           .isEqualTo(
               "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"exception\",\"diagnostics\":\"94709a92-ee29-4b85-99a0-e9c8dd2afd3d: localizedMessage\"}]}");
