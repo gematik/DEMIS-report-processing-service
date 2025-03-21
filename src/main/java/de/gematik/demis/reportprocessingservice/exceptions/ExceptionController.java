@@ -1,21 +1,3 @@
-/*
- * Copyright [2024], gematik GmbH
- *
- * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the
- * European Commission – subsequent versions of the EUPL (the "Licence").
- * You may not use this work except in compliance with the Licence.
- *
- * You find a copy of the Licence in the "Licence" file or at
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
- * In case of changes by gematik find details in the "Readme" file.
- *
- * See the Licence for the specific language governing permissions and limitations under the Licence.
- */
-
 package de.gematik.demis.reportprocessingservice.exceptions;
 
 /*-
@@ -45,7 +27,6 @@ import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 import ca.uhn.fhir.parser.DataFormatException;
@@ -61,7 +42,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -86,13 +66,6 @@ public class ExceptionController {
       Exception exception, HttpServletRequest request) {
 
     return createResponseEntity(exception, BAD_REQUEST, request, exception.getLocalizedMessage());
-  }
-
-  @ExceptionHandler(value = AccessDeniedException.class)
-  public ResponseEntity<String> handleAccessDeniedException(
-      Exception exception, HttpServletRequest request) {
-
-    return createResponseEntity(exception, FORBIDDEN, request, exception.getLocalizedMessage());
   }
 
   @ExceptionHandler(value = {DataFormatException.class, ParsingException.class})

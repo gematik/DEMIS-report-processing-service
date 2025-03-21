@@ -49,7 +49,6 @@ This project includes:
   context-propagation under The Apache Software License, Version 2.0
   Disruptor Framework under The Apache Software License, Version 2.0
   error-prone annotations under Apache 2.0
-  Evictor under The Apache Software License, Version 2.0
   Feign Core under The Apache Software License, Version 2.0
   Feign Micrometer under The Apache Software License, Version 2.0
   Feign SLF4J under The Apache Software License, Version 2.0
@@ -91,7 +90,6 @@ This project includes:
   jmustache under The (New) BSD License
   Joda-Time under Apache License, Version 2.0
   JOpt Simple under The MIT License
-  jose4j under The Apache Software License, Version 2.0
   JSON library from Android SDK under Apache License 2.0
   JSON Small and Fast Parser under The Apache Software License, Version 2.0
   json-patch under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
@@ -158,7 +156,6 @@ This project includes:
   Netty/Transport under Apache License, Version 2.0
   Netty/Transport/Native/Unix/Common under Apache License, Version 2.0
   Nimbus JOSE+JWT under The Apache Software License, Version 2.0
-  Non-Blocking Reactive Foundation for the JVM under Apache License, Version 2.0
   notification-builder-library under Licensed under the EUPL 1.2
   Objenesis under Apache License, Version 2.0
   Old JAXB Core under Eclipse Distribution License - v 1.0
@@ -190,8 +187,6 @@ This project includes:
   Prometheus Metrics Exposition Text Formats under The Apache Software License, Version 2.0
   Prometheus Metrics Model under The Apache Software License, Version 2.0
   Prometheus Metrics Tracer Common under The Apache Software License, Version 2.0
-  reactive-streams under MIT-0
-  Reactor Extra under Apache License, Version 2.0
   report-processing-service under Licensed under the EUPL 1.2
   service-base under Licensed under the EUPL 1.2
   SLF4J API Module under MIT License
@@ -200,12 +195,10 @@ This project includes:
   Spring Beans under Apache License, Version 2.0
   Spring Cloud Commons under Apache License, Version 2.0
   Spring Cloud Context under Apache License, Version 2.0
-  Spring Cloud Load Balancer under Apache License, Version 2.0
   Spring Cloud OpenFeign Core under Apache License, Version 2.0
   Spring Cloud Starter OpenFeign under Apache License, Version 2.0
   Spring Commons Logging Bridge under Apache License, Version 2.0
   Spring Context under Apache License, Version 2.0
-  Spring Context Support under Apache License, Version 2.0
   Spring Core under Apache License, Version 2.0
   Spring Expression Language (SpEL) under Apache License, Version 2.0
   Spring TestContext Framework under Apache License, Version 2.0
@@ -215,15 +208,11 @@ This project includes:
   spring-boot-actuator under Apache License, Version 2.0
   spring-boot-actuator-autoconfigure under Apache License, Version 2.0
   spring-boot-autoconfigure under Apache License, Version 2.0
-  spring-boot-configuration-processor under Apache License, Version 2.0
   spring-boot-starter under Apache License, Version 2.0
   spring-boot-starter-actuator under Apache License, Version 2.0
   spring-boot-starter-aop under Apache License, Version 2.0
-  spring-boot-starter-cache under Apache License, Version 2.0
   spring-boot-starter-json under Apache License, Version 2.0
   spring-boot-starter-logging under Apache License, Version 2.0
-  spring-boot-starter-oauth2-resource-server under Apache License, Version 2.0
-  spring-boot-starter-security under Apache License, Version 2.0
   spring-boot-starter-test under Apache License, Version 2.0
   spring-boot-starter-tomcat under Apache License, Version 2.0
   spring-boot-starter-validation under Apache License, Version 2.0
@@ -232,21 +221,13 @@ This project includes:
   spring-boot-test-autoconfigure under Apache License, Version 2.0
   spring-cloud-contract-wiremock under Apache License, Version 2.0
   spring-cloud-starter under Apache License, Version 2.0
-  spring-cloud-starter-loadbalancer under Apache License, Version 2.0
   spring-cloud-test-support under Apache License, Version 2.0
-  spring-security-config under Apache License, Version 2.0
-  spring-security-core under Apache License, Version 2.0
   spring-security-crypto under Apache License, Version 2.0
-  spring-security-oauth2-core under Apache License, Version 2.0
-  spring-security-oauth2-jose under Apache License, Version 2.0
-  spring-security-oauth2-resource-server under Apache License, Version 2.0
-  spring-security-test under Apache License, Version 2.0
-  spring-security-web under Apache License, Version 2.0
   springdoc-openapi-starter-common under The Apache License, Version 2.0
   springdoc-openapi-starter-webmvc-api under The Apache License, Version 2.0
   springdoc-openapi-starter-webmvc-ui under The Apache License, Version 2.0
   Stax2 API under The BSD 2-Clause License
-  Swagger UI under Apache 2.0
+  Swagger UI under Apache-2.0
   swagger-annotations under Apache License 2.0
   swagger-annotations-jakarta under Apache License 2.0
   swagger-compat-spec-parser under Apache License 2.0
