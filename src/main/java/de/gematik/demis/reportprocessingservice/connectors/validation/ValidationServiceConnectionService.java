@@ -59,10 +59,10 @@ public class ValidationServiceConnectionService {
   private final RPSErrorDecoder errorDecoder =
       new RPSErrorDecoder("validation-service", ERROR_IN_VALIDATION_CALL, ERROR_IN_VALIDATION_CALL);
 
-  @Value("${rps.flags.relaxed-validation:false}")
+  @Value("${config.relaxed-validation:false}")
   boolean relaxedMode;
 
-  @Value("${rps.outcome-issue-threshold}")
+  @Value("${config.outcome.issue.level}")
   IssueSeverity outcomeIssueThreshold = IssueSeverity.WARNING;
 
   private static boolean isStatusSuccessful(final int status) {

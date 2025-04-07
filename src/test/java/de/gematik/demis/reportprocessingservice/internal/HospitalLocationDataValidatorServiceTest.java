@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import de.gematik.demis.notification.builder.demis.fhir.notification.builder.NotifierDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBedOccupancyDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBundleDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.StatisticInformationBedOccupancyDataBuilder;
+import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.PractitionerRoleBuilder;
 import de.gematik.demis.reportprocessingservice.connectors.hls.HospitalLocationConnectionService;
 import de.gematik.demis.reportprocessingservice.exceptions.HospitalLocationValidationException;
 import de.gematik.demis.reportprocessingservice.exceptions.InternalException;
@@ -107,7 +107,8 @@ class HospitalLocationDataValidatorServiceTest {
 
   private Bundle createBundleWithSpecificAddress() {
     ReportBundleDataBuilder reportBundleDataBuilder = new ReportBundleDataBuilder();
-    PractitionerRole notifierRole = new NotifierDataBuilder().buildReportExampleNotifierData();
+    PractitionerRole notifierRole =
+        new PractitionerRoleBuilder().setDefaults().asNotifierRole().build();
     reportBundleDataBuilder.setNotifierRole(notifierRole);
     QuestionnaireResponse statistic =
         new StatisticInformationBedOccupancyDataBuilder()

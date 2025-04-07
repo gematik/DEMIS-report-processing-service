@@ -51,14 +51,14 @@ import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
-      "rps.flags.relaxed-validation=false"
+      "config.relaxed-validation=false"
     })
 @AutoConfigureWireMock(port = 0)
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})
@@ -70,7 +70,7 @@ class ValidationServiceConnectionIntegrationTest {
                     {"outcome":"does not matter"}
             """;
 
-  @MockBean FhirContext fhirContext;
+  @MockitoBean FhirContext fhirContext;
   @Autowired ValidationServiceConnectionService underTest;
 
   private static void setupVS(

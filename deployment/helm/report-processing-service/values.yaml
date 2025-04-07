@@ -48,7 +48,8 @@ deploymentLabels: {}
 
 # Environment Variables to be defined
 customEnvVars:
-  DEMIS_IDP_VALIDATE_JWT: "true"
+  CONFIG_RELAXED_VALIDATION: "true"
+  CONFIG_OUTCOME_ISSUE_LEVEL: "WARNING"
 
 # Define Image Pull Secrets if using private registry
 imagePullSecrets: []

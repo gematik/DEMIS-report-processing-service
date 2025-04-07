@@ -37,11 +37,11 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import de.gematik.demis.notification.builder.demis.fhir.notification.builder.NotifierDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBedOccupancyDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBundleDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.StatisticInformationBedOccupancyDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.AddressDataBuilder;
+import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.PractitionerRoleBuilder;
 import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
 import de.gematik.demis.reportprocessingservice.connectors.hls.HospitalLocationServiceClient;
 import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiClient;
@@ -67,7 +67,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -346,10 +348,12 @@ class ReportProcessingServiceIntegrationTest {
             .setHouseNumber("136")
             .build();
     PractitionerRole practitioner =
-        new NotifierDataBuilder()
-            .setNotifierAddress(address)
-            .setNotifierFacilityName("Testkrankenhaus - gematik GmbH")
-            .buildReportExampleNotifierData();
+        new PractitionerRoleBuilder()
+            .setDefaults()
+            .asNotifierRole()
+            .withPractitioner(new Practitioner().addAddress(address))
+            .withOrganization(new Organization().setName("Testkrankenhaus - gematik GmbH"))
+            .build();
     QuestionnaireResponse statisticData =
         new StatisticInformationBedOccupancyDataBuilder()
             .buildExampleStatisticInformationBedOccupancy();

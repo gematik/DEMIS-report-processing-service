@@ -22,20 +22,8 @@ package de.gematik.demis.reportprocessingservice;
  * #L%
  */
 
-import de.gematik.demis.service.base.apidoc.EnableDefaultApiSpecConfig;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.openfeign.FeignAutoConfiguration;
+import de.gematik.demis.AbstractOpenApiSpecDownloaderTest;
 
-@SpringBootApplication
-@EnableFeignClients
-@EnableDefaultApiSpecConfig
-@ImportAutoConfiguration({FeignAutoConfiguration.class})
-public class ReportProcessingServiceApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(ReportProcessingServiceApplication.class, args);
-  }
+public class OpenApiSpecDownloaderTest extends AbstractOpenApiSpecDownloaderTest {
+  // executes test from AbstractOpenApiSpecDownloaderTest
 }
