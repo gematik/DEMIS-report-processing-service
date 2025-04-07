@@ -2,12 +2,23 @@
 
 # Release notes
 
+## Release 2.0.0 (2025-03-21)
+
+- Updated:
+  - Spring Parent to 2.7.2
+  - Renamed flags for activating relaxed validation and outcome validation log level
+
+## Release 1.6.9 (2025-03-21)
+
+- Removed:
+  - JWT Validation
+
 ## Release 1.6.7 (2025-02-21)
 
 - Update:
   - Dependency-Updates (CVEs et al.)
   - Extended logging
-  - Add context-informations (provenance) before pdf will be generated
+  - Add context-information (provenance) before pdf will be generated
 
 ## Release 1.5.3 (2024-04-04)
 
