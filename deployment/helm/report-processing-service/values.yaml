@@ -19,18 +19,6 @@ required:
     # If not given, the Chart AppVersion will be used
     tag: null
 
-# Define custom configuration values
-config:
-  # The (external) Secret Object containing the API Key entry
-  secret:
-    # The (external) Secret for API Keys
-    api:
-      # The name of the (external) Secret for API and the entries to be used and mapped
-      name: ncapi-apikey
-      # The name of the (external) Secret for API and the key to be used:
-      # IMPORTANT: these values must be defined in the Secret
-      key: NCS_APIKEY
-
 # Define custom Container Entrypoint and Arguments (e.g. JVM Tuning)
 # If not given, the Entrypoint defined in Dockerfile will be used
 application:
@@ -48,8 +36,13 @@ deploymentLabels: {}
 
 # Environment Variables to be defined
 customEnvVars:
-  CONFIG_RELAXED_VALIDATION: "true"
-  CONFIG_OUTCOME_ISSUE_LEVEL: "WARNING"
+  FEATURE_FLAG_RELAXED_VALIDATION: "false"
+  CONFIG_OPT_OUTCOME_ISSUE_LEVEL: "WARNING"
+  DEMIS_NETWORK_VALIDATION_SERVICE_ADDRESS: http://validation-service.demis.svc.cluster.local
+  DEMIS_NETWORK_NOTIFICATION_CLEARING_API_ADDRESS: http://notification-clearing-api.demis.svc.cluster.local
+  DEMIS_NETWORK_HOSPITAL_LOCATION_SERVICE_ADDRESS: http://hospital-location-service.demis.svc.cluster.local
+  DEMIS_NETWORK_PDFGEN_SERVICE_ADDRESS: http://pdfgen-service.demis.svc.cluster.local
+  DEMIS_NETWORK_CONTEXT_ENRICHMENT_SERVICE_ADDRESS: http://context-enrichment-service.demis.svc.cluster.local
 
 # Define Image Pull Secrets if using private registry
 imagePullSecrets: []
@@ -120,11 +113,10 @@ service:
 # Default Resources
 resources:
   limits:
-    cpu: "1000m"
-    memory: "1Gi"
+    memory: "500Mi"
   requests:
-    cpu: "200m"
-    memory: "1Gi"
+    cpu: "50m"
+    memory: "500Mi"
 
 autoscaling:
   enabled: false

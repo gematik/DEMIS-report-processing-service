@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -58,7 +62,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest(
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
-      "config.relaxed-validation=false"
+      "feature.flag.relaxed.validation=false"
     })
 @AutoConfigureWireMock(port = 0)
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})

@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.internal;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -112,9 +116,11 @@ class HospitalLocationDataValidatorServiceTest {
     reportBundleDataBuilder.setNotifierRole(notifierRole);
     QuestionnaireResponse statistic =
         new StatisticInformationBedOccupancyDataBuilder()
+            .setDefaults()
             .buildExampleStatisticInformationBedOccupancy();
     Composition composition =
         new ReportBedOccupancyDataBuilder()
+            .setDefaults()
             .setSubject(new Identifier().setValue("987654"))
             .setNotifierRole(notifierRole)
             .setStatisticInformationBedOccupancy(statistic)

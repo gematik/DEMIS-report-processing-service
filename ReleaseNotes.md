@@ -2,30 +2,37 @@
 
 # Release notes
 
-## Release 2.0.0 (2025-03-21)
+## Release 2.1.0
+- renamed feature flag for relaxed validation to `feature.flag.relaxed.validation` and disabled by default
+- removed the superseded notification-clearing-api API key 
+- update dependencies
 
+## Release 2.0.1
+- Updated ospo-resources for adding additional notes and disclaimer
+- setting new resources in helm chart
+- setting new timeouts and retries in helm chart
+- change base chart to istio hostnames
+- update dependencies
+
+## Release 2.0.0
 - Updated:
   - Spring Parent to 2.7.2
   - Renamed flags for activating relaxed validation and outcome validation log level
 
-## Release 1.6.9 (2025-03-21)
-
+## Release 1.6.9
 - Removed:
   - JWT Validation
 
-## Release 1.6.7 (2025-02-21)
-
+## Release 1.6.7
 - Update:
   - Dependency-Updates (CVEs et al.)
   - Extended logging
   - Add context-information (provenance) before pdf will be generated
 
-## Release 1.5.3 (2024-04-04)
-
+## Release 1.5.3
 - first official GitHub-Release
 
 ## Internal Releases - non official GitHub-Releases 
-
 | Version | Acceptance | Productive | Notes | Tickets |
 |---------|------------|------------|-------|---------|
 | 1.3.5   | x.x.2023   | 28.06.2023 | repeatable bundle id generation. notification id in receipt bundle. spring boot update. logs contain client id | |

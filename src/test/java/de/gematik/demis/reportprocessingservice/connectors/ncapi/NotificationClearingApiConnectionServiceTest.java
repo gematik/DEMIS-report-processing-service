@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.connectors.ncapi;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -49,7 +53,7 @@ class NotificationClearingApiConnectionServiceTest {
   void init() {
     notificationClearingApiConnectionService =
         new NotificationClearingApiConnectionService(
-            "theapikey", notificationClearingApiClientMock, fhirParserServiceMock);
+            notificationClearingApiClientMock, fhirParserServiceMock);
   }
 
   @Test
@@ -61,14 +65,13 @@ class NotificationClearingApiConnectionServiceTest {
     String someBundleString = "SomeBundleString";
     when(fhirParserServiceMock.encodeToJson(any())).thenReturn(someBundleString);
 
-    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(
-            anyString(), anyString()))
+    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(anyString()))
         .thenReturn(ResponseEntity.ok().build());
 
     notificationClearingApiConnectionService.sendReportBundleToNCAPI(bundle);
 
     verify(notificationClearingApiClientMock)
-        .sendNotificationToNotificationClearingAPI("Bearer theapikey", someBundleString);
+        .sendNotificationToNotificationClearingAPI(someBundleString);
   }
 
   @Test
@@ -80,8 +83,7 @@ class NotificationClearingApiConnectionServiceTest {
     String someBundleString = "SomeBundleString";
     when(fhirParserServiceMock.encodeToJson(any())).thenReturn(someBundleString);
 
-    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(
-            anyString(), anyString()))
+    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(anyString()))
         .thenReturn(ResponseEntity.badRequest().build());
 
     assertThatThrownBy(

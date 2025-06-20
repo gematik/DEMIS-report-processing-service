@@ -19,13 +19,16 @@ package de.gematik.demis.reportprocessingservice.connectors.ncapi;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(
     name = "notification-clearing-api",
@@ -33,6 +36,5 @@ import org.springframework.web.bind.annotation.RequestHeader;
     configuration = NotificationClearingApiClientConfiguration.class)
 public interface NotificationClearingApiClient {
   @PostMapping(value = "/", consumes = "application/fhir+json", produces = "application/fhir+json")
-  ResponseEntity<String> sendNotificationToNotificationClearingAPI(
-      @RequestHeader("Authorization") String bearerToken, String bundleAsJson);
+  ResponseEntity<String> sendNotificationToNotificationClearingAPI(String bundleAsJson);
 }

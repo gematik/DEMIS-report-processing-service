@@ -2,8 +2,6 @@
 {{- $dockerRepository := .Values.required.image.repository | required ".Values.required.image.repository is required." -}}
 {{- $dockerImage := .Values.required.image.name | required ".Values.required.image.name is required." -}}
 {{- $dockerTag := .Values.required.image.tag | default .Chart.AppVersion -}}
-{{- $secretApiKeyName := .Values.config.secret.api.name | required ".Values.config.secret.api.name is required" -}}
-{{- $secretApiKeyEntry := .Values.config.secret.api.key -}}
 {{- $customEnvVars := .Values.customEnvVars -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -47,12 +45,6 @@ spec:
         - name: jfr-volume
           emptyDir: {}
         {{- end }}
-        - name: api-key-secret-volume
-          secret:
-            secretName: {{ $secretApiKeyName }}
-            items:
-            - key: {{ $secretApiKeyEntry }}
-              path: ncs/apikey
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -95,9 +87,6 @@ spec:
               value: {{ get $customEnvVars $key | quote }}
             {{- end }}
             {{- end }}
-            # Set Spring Configuration Import from Folder Structure
-            - name: "SPRING_CONFIG_IMPORT"
-              value: "optional:configtree:{{ include "report-processing-service.secretMountPath" . }}/api/"
           # Mount Volumes in container
           volumeMounts:
             - name: tmp-volume
@@ -106,9 +95,6 @@ spec:
             - name: jfr-volume
               mountPath: /jfrdump
             {{- end }}
-            - name: api-key-secret-volume
-              readOnly: true
-              mountPath: "{{ include "report-processing-service.secretMountPath" . }}/api"
           # Ports to be exposed from the container
           ports:
             - name: rps-port
