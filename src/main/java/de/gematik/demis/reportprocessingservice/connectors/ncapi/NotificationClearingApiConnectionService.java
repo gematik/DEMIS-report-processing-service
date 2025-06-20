@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.connectors.ncapi;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -31,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -41,15 +44,11 @@ public class NotificationClearingApiConnectionService {
 
   private final NotificationClearingApiClient notificationClearingApiClient;
   private final FhirParser fhirParserService;
-  private final String ncsApiKey;
 
   public NotificationClearingApiConnectionService(
-      @Value("${ncs.apikey}") String ncsApiKey,
-      NotificationClearingApiClient notificationClearingApiClient,
-      FhirParser fhirParserService) {
+      NotificationClearingApiClient notificationClearingApiClient, FhirParser fhirParserService) {
     this.notificationClearingApiClient = notificationClearingApiClient;
     this.fhirParserService = fhirParserService;
-    this.ncsApiKey = ncsApiKey;
   }
 
   public void sendReportBundleToNCAPI(Bundle bundle) {
@@ -59,8 +58,7 @@ public class NotificationClearingApiConnectionService {
     String bundleAsJson = fhirParserService.encodeToJson(transactionBundle);
     log.info("sending bundle {} to ncapi", bundle.getId());
     ResponseEntity<String> stringResponseEntity =
-        notificationClearingApiClient.sendNotificationToNotificationClearingAPI(
-            "Bearer " + ncsApiKey, bundleAsJson);
+        notificationClearingApiClient.sendNotificationToNotificationClearingAPI(bundleAsJson);
     log.info(
         format(
             "notification send to ncapi, return code is %d",

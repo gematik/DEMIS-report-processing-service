@@ -14,10 +14,8 @@ istio:
         uri: /
       timeout: null
       retries:
-        enable: false
-#        attempts: 3
-#        perTryTimeout: 5s
-        retryOn: null
+        enable: true
+        attempts: 0
     hosts: {}
   subsets:
     main:

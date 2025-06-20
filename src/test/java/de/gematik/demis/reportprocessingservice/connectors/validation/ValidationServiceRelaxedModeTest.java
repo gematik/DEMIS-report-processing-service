@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -45,7 +49,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ValidationServiceRelaxedModeTest {
 
   private static final String ORIGINAL_NOTIFICATION =
-      """
+"""
 <Bundle xmlns="http://hl7.org/fhir">
     <id value="098f6bcd-4621-3373-8ade-4e832627b4f6" />
     <id value="9aaaaaaa-4621-3373-8ade-bbbbbbbbbbbb" />
@@ -53,7 +57,7 @@ class ValidationServiceRelaxedModeTest {
 """;
 
   private static final String CORRECTED_NOTIFICATION =
-      """
+"""
 {"resourceType":"Bundle","id":"098f6bcd-4621-3373-8ade-4e832627b4f6"}""";
 
   private static final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -137,7 +141,7 @@ class ValidationServiceRelaxedModeTest {
   @Test
   void fhirNotificationNotParseable() throws Exception {
     final String notParseableNotification =
-        """
+"""
 <Bundle xmlns="http://hl7.org/fhir">
     <id value="098f6bcd-4621-3373-8ade-4e832627b4f6" />
     <syntax error

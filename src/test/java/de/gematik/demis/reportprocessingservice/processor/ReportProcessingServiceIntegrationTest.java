@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.processor;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -58,6 +62,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -126,8 +131,7 @@ class ReportProcessingServiceIntegrationTest {
         .thenReturn(createResponse(200, validationOutcomeJson));
     when(validationServiceClient.validateBundleJson(anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
-    when(notificationClearingApiClient.sendNotificationToNotificationClearingAPI(
-            anyString(), anyString()))
+    when(notificationClearingApiClient.sendNotificationToNotificationClearingAPI(anyString()))
         .thenReturn(ResponseEntity.ok().build());
     Binary binary = new Binary();
     binary.setData("Hello World".getBytes());
@@ -347,26 +351,32 @@ class ReportProcessingServiceIntegrationTest {
             .setStreet("Friedrichstr.")
             .setHouseNumber("136")
             .build();
-    PractitionerRole practitioner =
+    final Practitioner practitioner = new Practitioner();
+    practitioner.setId(UUID.randomUUID().toString());
+    final Organization organization = new Organization().setName("Testkrankenhaus - gematik GmbH");
+    organization.setId(UUID.randomUUID().toString());
+    PractitionerRole practitionerRole =
         new PractitionerRoleBuilder()
             .setDefaults()
             .asNotifierRole()
-            .withPractitioner(new Practitioner().addAddress(address))
-            .withOrganization(new Organization().setName("Testkrankenhaus - gematik GmbH"))
+            .withPractitioner(practitioner)
+            .withOrganization(organization)
             .build();
     QuestionnaireResponse statisticData =
         new StatisticInformationBedOccupancyDataBuilder()
+            .setDefaults()
             .buildExampleStatisticInformationBedOccupancy();
     Composition composition =
         new ReportBedOccupancyDataBuilder()
+            .setDefaults()
             .setSubject(new Identifier().setValue("987654"))
             .setStatisticInformationBedOccupancy(statisticData)
-            .setNotifierRole(practitioner)
+            .setNotifierRole(practitionerRole)
             .build();
     Bundle bundle =
         new ReportBundleDataBuilder()
             .setReportBedOccupancy(composition)
-            .setNotifierRole(practitioner)
+            .setNotifierRole(practitionerRole)
             .setIdentifier(new Identifier().setValue("5b9a47fa-10c7-4277-b2ca-f12bf2a0a6f7"))
             .setDefaults()
             .build();

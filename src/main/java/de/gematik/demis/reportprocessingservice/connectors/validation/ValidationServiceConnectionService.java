@@ -19,6 +19,10 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * In case of changes by gematik find details in the "Readme" file.
  *
  * See the Licence for the specific language governing permissions and limitations under the Licence.
+ *
+ * *******
+ *
+ * For additional notes and disclaimer from gematik and in case of changes by gematik find details in the "Readme" file.
  * #L%
  */
 
@@ -59,10 +63,10 @@ public class ValidationServiceConnectionService {
   private final RPSErrorDecoder errorDecoder =
       new RPSErrorDecoder("validation-service", ERROR_IN_VALIDATION_CALL, ERROR_IN_VALIDATION_CALL);
 
-  @Value("${config.relaxed-validation:false}")
+  @Value("${feature.flag.relaxed.validation:false}")
   boolean relaxedMode;
 
-  @Value("${config.outcome.issue.level}")
+  @Value("${config.opt.outcome.issue.level:warning}")
   IssueSeverity outcomeIssueThreshold = IssueSeverity.WARNING;
 
   private static boolean isStatusSuccessful(final int status) {
