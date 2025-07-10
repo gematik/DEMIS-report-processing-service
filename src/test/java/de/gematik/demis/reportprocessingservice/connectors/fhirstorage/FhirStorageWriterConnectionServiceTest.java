@@ -1,4 +1,4 @@
-package de.gematik.demis.reportprocessingservice.connectors.ncapi;
+package de.gematik.demis.reportprocessingservice.connectors.fhirstorage;
 
 /*-
  * #%L
@@ -42,18 +42,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class NotificationClearingApiConnectionServiceTest {
+class FhirStorageWriterConnectionServiceTest {
 
-  private NotificationClearingApiConnectionService notificationClearingApiConnectionService;
+  private FhirStorageWriterConnectionService fhirStorageWriterConnectionService;
 
-  @Mock private NotificationClearingApiClient notificationClearingApiClientMock;
+  @Mock private FhirStorageWriterClient fhirStorageWriterClientMock;
+
   @Mock private FhirParser fhirParserServiceMock;
 
   @BeforeEach
   void init() {
-    notificationClearingApiConnectionService =
-        new NotificationClearingApiConnectionService(
-            notificationClearingApiClientMock, fhirParserServiceMock);
+    fhirStorageWriterConnectionService =
+        new FhirStorageWriterConnectionService(fhirStorageWriterClientMock, fhirParserServiceMock);
   }
 
   @Test
@@ -65,13 +65,12 @@ class NotificationClearingApiConnectionServiceTest {
     String someBundleString = "SomeBundleString";
     when(fhirParserServiceMock.encodeToJson(any())).thenReturn(someBundleString);
 
-    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(anyString()))
+    when(fhirStorageWriterClientMock.sendNotificationToFhirStorageWriter(anyString()))
         .thenReturn(ResponseEntity.ok().build());
 
-    notificationClearingApiConnectionService.sendReportBundleToNCAPI(bundle);
+    fhirStorageWriterConnectionService.sendReportBundleToFhirStorage(bundle);
 
-    verify(notificationClearingApiClientMock)
-        .sendNotificationToNotificationClearingAPI(someBundleString);
+    verify(fhirStorageWriterClientMock).sendNotificationToFhirStorageWriter(someBundleString);
   }
 
   @Test
@@ -83,11 +82,11 @@ class NotificationClearingApiConnectionServiceTest {
     String someBundleString = "SomeBundleString";
     when(fhirParserServiceMock.encodeToJson(any())).thenReturn(someBundleString);
 
-    when(notificationClearingApiClientMock.sendNotificationToNotificationClearingAPI(anyString()))
+    when(fhirStorageWriterClientMock.sendNotificationToFhirStorageWriter(anyString()))
         .thenReturn(ResponseEntity.badRequest().build());
 
     assertThatThrownBy(
-            () -> notificationClearingApiConnectionService.sendReportBundleToNCAPI(bundle))
+            () -> fhirStorageWriterConnectionService.sendReportBundleToFhirStorage(bundle))
         .isInstanceOf(InternalException.class)
         .hasMessage("Internal Error (Error-ID-RPS-003)");
   }

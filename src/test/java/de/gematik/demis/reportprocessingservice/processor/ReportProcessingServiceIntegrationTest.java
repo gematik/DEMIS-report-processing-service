@@ -47,8 +47,8 @@ import de.gematik.demis.notification.builder.demis.fhir.notification.builder.rep
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.AddressDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.PractitionerRoleBuilder;
 import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
+import de.gematik.demis.reportprocessingservice.connectors.fhirstorage.FhirStorageWriterClient;
 import de.gematik.demis.reportprocessingservice.connectors.hls.HospitalLocationServiceClient;
-import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiClient;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient;
 import de.gematik.demis.reportprocessingservice.exceptions.RpsServiceException;
@@ -102,7 +102,7 @@ class ReportProcessingServiceIntegrationTest {
   private static final String AZP = "demis-test";
   private static final String TOKEN = "Bearer test";
   @MockitoBean ValidationServiceClient validationServiceClient;
-  @MockitoBean NotificationClearingApiClient notificationClearingApiClient;
+  @MockitoBean FhirStorageWriterClient fhirStorageWriterClient;
   @MockitoBean PdfGenerationConnectionService pdfGenerationConnectionService;
   @MockitoBean HospitalLocationServiceClient hospitalLocationServiceClient;
   @Autowired private ReportProcessingService reportProcessingService;
@@ -131,7 +131,7 @@ class ReportProcessingServiceIntegrationTest {
         .thenReturn(createResponse(200, validationOutcomeJson));
     when(validationServiceClient.validateBundleJson(anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
-    when(notificationClearingApiClient.sendNotificationToNotificationClearingAPI(anyString()))
+    when(fhirStorageWriterClient.sendNotificationToFhirStorageWriter(anyString()))
         .thenReturn(ResponseEntity.ok().build());
     Binary binary = new Binary();
     binary.setData("Hello World".getBytes());

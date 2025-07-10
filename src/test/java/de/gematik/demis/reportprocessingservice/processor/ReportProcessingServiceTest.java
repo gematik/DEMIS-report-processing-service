@@ -39,7 +39,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.gematik.demis.fhirparserlibrary.FhirParser;
 import de.gematik.demis.fhirparserlibrary.ParsingException;
 import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
-import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiConnectionService;
+import de.gematik.demis.reportprocessingservice.connectors.fhirstorage.FhirStorageWriterConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationResult;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceConnectionService;
@@ -68,8 +68,7 @@ class ReportProcessingServiceTest {
 
   @Mock private ValidationServiceConnectionService validationServiceConnectionServiceMock;
 
-  @Mock
-  private NotificationClearingApiConnectionService notificationClearingApiConnectionServiceMock;
+  @Mock private FhirStorageWriterConnectionService fhirStorageWriterConnectionServiceMock;
 
   @Mock private HospitalLocationDataValidatorService hospitalLocationDataValidatorServiceMock;
 
@@ -88,7 +87,7 @@ class ReportProcessingServiceTest {
     reportProcessingService =
         new ReportProcessingService(
             validationServiceConnectionServiceMock,
-            notificationClearingApiConnectionServiceMock,
+            fhirStorageWriterConnectionServiceMock,
             hospitalLocationDataValidatorServiceMock,
             reportEnrichmentServiceMock,
             fhirParserService,

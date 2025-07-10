@@ -1,4 +1,4 @@
-package de.gematik.demis.reportprocessingservice.connectors.ncapi;
+package de.gematik.demis.reportprocessingservice.connectors.fhirstorage;
 
 /*-
  * #%L
@@ -26,7 +26,7 @@ package de.gematik.demis.reportprocessingservice.connectors.ncapi;
  * #L%
  */
 
-import static de.gematik.demis.reportprocessingservice.utils.ErrorCode.ERROR_IN_NCAPI_CALL;
+import static de.gematik.demis.reportprocessingservice.utils.ErrorCode.ERROR_IN_FSW_CALL;
 import static java.lang.String.format;
 
 import de.gematik.demis.fhirparserlibrary.FhirParser;
@@ -40,32 +40,32 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class NotificationClearingApiConnectionService {
+public class FhirStorageWriterConnectionService {
 
-  private final NotificationClearingApiClient notificationClearingApiClient;
+  private final FhirStorageWriterClient fhirStorageWriterClient;
   private final FhirParser fhirParserService;
 
-  public NotificationClearingApiConnectionService(
-      NotificationClearingApiClient notificationClearingApiClient, FhirParser fhirParserService) {
-    this.notificationClearingApiClient = notificationClearingApiClient;
+  public FhirStorageWriterConnectionService(
+      FhirStorageWriterClient fhirStorageWriterClient, FhirParser fhirParserService) {
+    this.fhirStorageWriterClient = fhirStorageWriterClient;
     this.fhirParserService = fhirParserService;
   }
 
-  public void sendReportBundleToNCAPI(Bundle bundle) {
+  public void sendReportBundleToFhirStorage(Bundle bundle) {
 
     Bundle transactionBundle = createTransactionBundleWithReceviedBundleAsEntry(bundle);
 
     String bundleAsJson = fhirParserService.encodeToJson(transactionBundle);
-    log.info("sending bundle {} to ncapi", bundle.getId());
+    log.info("sending bundle {} to fhir-storage-writer", bundle.getId());
     ResponseEntity<String> stringResponseEntity =
-        notificationClearingApiClient.sendNotificationToNotificationClearingAPI(bundleAsJson);
+        fhirStorageWriterClient.sendNotificationToFhirStorageWriter(bundleAsJson);
     log.info(
         format(
-            "notification send to ncapi, return code is %d",
+            "notification send to fhir-storage-writer, return code is %d",
             stringResponseEntity.getStatusCode().value()));
     if (!stringResponseEntity.getStatusCode().is2xxSuccessful()) {
-      log.error("sending to notification clearing api ended with an error");
-      throw new InternalException(ERROR_IN_NCAPI_CALL);
+      log.error("sending to fhir-storage-writer ended with an error");
+      throw new InternalException(ERROR_IN_FSW_CALL);
     }
   }
 

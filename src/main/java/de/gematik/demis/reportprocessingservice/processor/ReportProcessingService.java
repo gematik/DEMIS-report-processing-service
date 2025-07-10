@@ -33,7 +33,7 @@ import de.gematik.demis.fhirparserlibrary.FhirParser;
 import de.gematik.demis.fhirparserlibrary.ParsingException;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.receipt.ReceiptBuilder;
 import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
-import de.gematik.demis.reportprocessingservice.connectors.ncapi.NotificationClearingApiConnectionService;
+import de.gematik.demis.reportprocessingservice.connectors.fhirstorage.FhirStorageWriterConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.pdf.PdfGenerationConnectionService;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationResult;
 import de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceConnectionService;
@@ -65,7 +65,7 @@ public class ReportProcessingService {
       "https://demis.rki.de/fhir/StructureDefinition/ReportBundle";
 
   private final ValidationServiceConnectionService validationServiceConnectionService;
-  private final NotificationClearingApiConnectionService notificationClearingApiConnectionService;
+  private final FhirStorageWriterConnectionService fhirStorageWriterConnectionService;
   private final HospitalLocationDataValidatorService hospitalLocationDataValidatorService;
   private final ReportEnrichmentService reportEnrichmentService;
   private final FhirParser fhirParserService;
@@ -129,8 +129,8 @@ public class ReportProcessingService {
     Optional<Binary> pdf =
         pdfGenerationConnectionService.generateBedOccupancyReceipt(bundle, requestId);
 
-    // 6. NCAPI extern
-    notificationClearingApiConnectionService.sendReportBundleToNCAPI(bundle);
+    // 6. fhir-storage-writer extern
+    fhirStorageWriterConnectionService.sendReportBundleToFhirStorage(bundle);
 
     Parameters returnParameters =
         createReturnValue(bundle, pdf, validationResult.operationOutcome());

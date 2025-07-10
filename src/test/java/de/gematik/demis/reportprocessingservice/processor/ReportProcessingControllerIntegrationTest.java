@@ -57,7 +57,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class ReportProcessingControllerIntegrationTest {
 
   private static final WireMockServer VALIDATION_SERVER = new WireMockServer(7070);
-  private static final WireMockServer CLEARING_API_SERVER = new WireMockServer(7071);
+  private static final WireMockServer FHIR_STORAGE_SERVER = new WireMockServer(7071);
   private static final WireMockServer HLS_SERVER = new WireMockServer(7072);
   private static final WireMockServer PDF_SERVER = new WireMockServer(7073);
   private static final UrlPathPattern HLS_GET_URL = urlPathMatching(".*\\/hospital-locations.*");
@@ -65,7 +65,7 @@ public class ReportProcessingControllerIntegrationTest {
   @BeforeAll
   public static void startServers() {
     VALIDATION_SERVER.start();
-    CLEARING_API_SERVER.start();
+    FHIR_STORAGE_SERVER.start();
     HLS_SERVER.start();
     PDF_SERVER.start();
   }
@@ -73,7 +73,7 @@ public class ReportProcessingControllerIntegrationTest {
   @AfterAll
   public static void stopServers() {
     VALIDATION_SERVER.stop();
-    CLEARING_API_SERVER.stop();
+    FHIR_STORAGE_SERVER.stop();
     HLS_SERVER.stop();
     PDF_SERVER.stop();
   }
@@ -139,7 +139,7 @@ public class ReportProcessingControllerIntegrationTest {
         com.github.tomakehurst.wiremock.client.WireMock.post(urlPathMatching(".*\\/bedOccupancy"))
             .willReturn(aResponse().withStatus(200).withBody("MockPdf".getBytes())));
 
-    configureFor(CLEARING_API_SERVER.port());
+    configureFor(FHIR_STORAGE_SERVER.port());
     stubFor(
         com.github.tomakehurst.wiremock.client.WireMock.post(urlPathMatching(".*\\/"))
             .willReturn(aResponse().withStatus(200)));
