@@ -1,6 +1,8 @@
 <img align="right" width="200" height="37" src="media/Gematik_Logo_Flag.png"/> <br/>
 
 # Release notes
+## Release 2.1.1
+- rename all NCAPI references to fhir-storage-writer
 
 ## Release 2.1.0
 - renamed feature flag for relaxed validation to `feature.flag.relaxed.validation` and disabled by default

@@ -1,4 +1,4 @@
-package de.gematik.demis.reportprocessingservice.connectors.ncapi;
+package de.gematik.demis.reportprocessingservice.connectors.fhirstorage;
 
 /*-
  * #%L
@@ -26,15 +26,26 @@ package de.gematik.demis.reportprocessingservice.connectors.ncapi;
  * #L%
  */
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import de.gematik.demis.reportprocessingservice.decoder.RPSErrorDecoder;
+import de.gematik.demis.reportprocessingservice.utils.ErrorCode;
+import feign.Capability;
+import feign.codec.ErrorDecoder;
+import feign.micrometer.MicrometerCapability;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@FeignClient(
-    name = "notification-clearing-api",
-    url = "${demis.network.notification-clearing-api-address}",
-    configuration = NotificationClearingApiClientConfiguration.class)
-public interface NotificationClearingApiClient {
-  @PostMapping(value = "/", consumes = "application/fhir+json", produces = "application/fhir+json")
-  ResponseEntity<String> sendNotificationToNotificationClearingAPI(String bundleAsJson);
+@Configuration
+public class FhirStorageWriterClientConfiguration {
+
+  @Bean(name = "ncsApiDecoder")
+  public ErrorDecoder errorDecoder() {
+    return new RPSErrorDecoder(
+        "fhir-storage-writer", ErrorCode.ERROR_IN_FSW_CALL, ErrorCode.ERROR_IN_FSW_CALL_5XX);
+  }
+
+  @Bean
+  public Capability fswCapability(final MeterRegistry registry) {
+    return new MicrometerCapability(registry);
+  }
 }
