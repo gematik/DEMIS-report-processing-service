@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
     name = "hospital-location-service",
-    url = "${demis.network.hospital-location-service-address}",
+    url = "${demis.network.hospital-location-service.address}",
     configuration = HospitalLocationServiceClientConfiguration.class)
 public interface HospitalLocationServiceClient {
 
-  @GetMapping(value = "/hospital-locations")
+  @GetMapping(value = "${demis.network.hospital-location-service.locations.endpoint}")
   ResponseEntity<List<HospitalLocationDTO>> getHospitalData(@RequestParam String ik);
 }

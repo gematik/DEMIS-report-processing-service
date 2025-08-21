@@ -1,6 +1,12 @@
 <img align="right" width="200" height="37" src="media/Gematik_Logo_Flag.png"/> <br/>
 
 # Release notes
+
+## Release 2.2.0
+- add feature flag FEATURE_FLAG_NEW_API_ENDPOINTS for header propagation of x-fhir-api-version and x-fhir-profile to validation-service
+- add support for new hospital location service endpoint
+- add support for new fhir storage writer endpoint
+
 ## Release 2.1.1
 - rename all NCAPI references to fhir-storage-writer
 

@@ -31,6 +31,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
@@ -127,9 +128,9 @@ class ReportProcessingServiceIntegrationTest {
         .setDiagnostics("For Test");
     final String validationOutcomeJson =
         fhirContext.newJsonParser().encodeResourceToString(validationOutcome);
-    when(validationServiceClient.validateBundleXml(anyString()))
+    when(validationServiceClient.validateBundleXml(any(), anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
-    when(validationServiceClient.validateBundleJson(anyString()))
+    when(validationServiceClient.validateBundleJson(any(), anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
     when(fhirStorageWriterClient.sendNotificationToFhirStorageWriter(anyString()))
         .thenReturn(ResponseEntity.ok().build());
@@ -218,7 +219,7 @@ class ReportProcessingServiceIntegrationTest {
 
     String operationOutcomeAsJson =
         fhirContext.newJsonParser().encodeResourceToString(operationOutcome);
-    when(validationServiceClient.validateBundleJson(anyString()))
+    when(validationServiceClient.validateBundleJson(any(), anyString()))
         .thenReturn(createResponse(422, operationOutcomeAsJson));
 
     String body =
