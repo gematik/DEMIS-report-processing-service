@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(
     name = "fhir-storage-writer",
-    url = "${demis.network.fhir-storage-writer-address}",
+    url =
+        "${demis.network.fhir-storage-writer.address}${demis.network.fhir-storage-writer.context-path}",
     configuration = FhirStorageWriterClientConfiguration.class)
 public interface FhirStorageWriterClient {
   @PostMapping(value = "/", consumes = "application/fhir+json", produces = "application/fhir+json")

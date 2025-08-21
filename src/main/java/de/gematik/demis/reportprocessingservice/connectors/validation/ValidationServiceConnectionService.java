@@ -26,10 +26,13 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * #L%
  */
 
+import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_API_VERSION;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_PROFILE;
 import static de.gematik.demis.reportprocessingservice.internal.OperationOutcomeUtils.filterOutcomeIssues;
 import static de.gematik.demis.reportprocessingservice.internal.OperationOutcomeUtils.orderOutcomeIssues;
 import static de.gematik.demis.reportprocessingservice.internal.OperationOutcomeUtils.reduceIssuesSeverityToWarn;
 import static de.gematik.demis.reportprocessingservice.utils.ErrorCode.ERROR_IN_VALIDATION_CALL;
+import static java.util.Optional.ofNullable;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -40,13 +43,17 @@ import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.StringDecoder;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
+import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -62,6 +69,11 @@ public class ValidationServiceConnectionService {
   private final Decoder stringDecoder = new StringDecoder();
   private final RPSErrorDecoder errorDecoder =
       new RPSErrorDecoder("validation-service", ERROR_IN_VALIDATION_CALL, ERROR_IN_VALIDATION_CALL);
+
+  private final HttpServletRequest httpServletRequest;
+
+  @Value("${feature.flag.new.api.endpoints}")
+  boolean isVersionHeaderForwardEnabled;
 
   @Value("${feature.flag.relaxed.validation:false}")
   boolean relaxedMode;
@@ -143,11 +155,22 @@ public class ValidationServiceConnectionService {
     }
   }
 
+  private List<String> headersFromRequestByName(@Nonnull String headerName) {
+    return ofNullable(httpServletRequest.getHeader(headerName)).map(List::of).orElse(null);
+  }
+
   private Response callValidationService(
       final String fhirNotification, final MessageType contentType) {
+    // forward optional Fhir Version and Fhir Profile Headers
+    final HttpHeaders headers = new HttpHeaders();
+
+    if (isVersionHeaderForwardEnabled) {
+      headers.computeIfAbsent(HEADER_FHIR_API_VERSION, this::headersFromRequestByName);
+      headers.computeIfAbsent(HEADER_FHIR_PROFILE, this::headersFromRequestByName);
+    }
     return switch (contentType) {
-      case JSON -> validationServiceClient.validateBundleJson(fhirNotification);
-      case XML -> validationServiceClient.validateBundleXml(fhirNotification);
+      case JSON -> validationServiceClient.validateBundleJson(headers, fhirNotification);
+      case XML -> validationServiceClient.validateBundleXml(headers, fhirNotification);
     };
   }
 

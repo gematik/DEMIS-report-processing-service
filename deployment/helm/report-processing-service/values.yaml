@@ -1,7 +1,7 @@
 # Default values for report-processing-service.
 
 # Number of Pod Replicas desired
-replicaCount: 1
+replicaCount: 2
 
 # Enables debug mode
 debug:
@@ -39,10 +39,11 @@ customEnvVars:
   FEATURE_FLAG_RELAXED_VALIDATION: "false"
   CONFIG_OPT_OUTCOME_ISSUE_LEVEL: "WARNING"
   DEMIS_NETWORK_VALIDATION_SERVICE_ADDRESS: http://validation-service.demis.svc.cluster.local
-  DEMIS_NETWORK_FHIR_STORAGE_WRITER_ADDRESS: http://fhir-storage-writer.demis.svc.cluster.local/notification-clearing-api/fhir
+  DEMIS_NETWORK_FHIR_STORAGE_WRITER_ADDRESS: http://fhir-storage-writer.demis.svc.cluster.local
   DEMIS_NETWORK_HOSPITAL_LOCATION_SERVICE_ADDRESS: http://hospital-location-service.demis.svc.cluster.local
   DEMIS_NETWORK_PDFGEN_SERVICE_ADDRESS: http://pdfgen-service.demis.svc.cluster.local
   DEMIS_NETWORK_CONTEXT_ENRICHMENT_SERVICE_ADDRESS: http://context-enrichment-service.demis.svc.cluster.local
+  FEATURE_FLAG_NEW_API_ENDPOINTS: "false"
 
 # Define Image Pull Secrets if using private registry
 imagePullSecrets: []

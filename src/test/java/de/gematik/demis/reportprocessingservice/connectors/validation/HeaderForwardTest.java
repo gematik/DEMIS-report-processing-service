@@ -26,6 +26,7 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * #L%
  */
 
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -33,25 +34,23 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_API_VERSION;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_PROFILE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import de.gematik.demis.fhirparserlibrary.MessageType;
-import de.gematik.demis.reportprocessingservice.exceptions.RestClientException;
+import java.util.Map;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
@@ -62,44 +61,35 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-@SpringBootTest(
+@SpringBootTest
+@TestPropertySource(
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
       "feature.flag.relaxed.validation=false",
-      "feature.flag.new.api.endpoints=false"
+      "feature.flag.new.api.endpoints=true"
     })
 @AutoConfigureWireMock(port = 0)
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})
-class ValidationServiceConnectionIntegrationTest {
+public class HeaderForwardTest {
   private static final String ENDPOINT_VS = "/VS/$validate";
+
   private static final String REQUEST_BODY = "my body";
   private static final String RESPONSE_BODY =
       """
       {"outcome":"does not matter"}
       """;
 
-  @MockitoBean FhirContext fhirContext;
+  @MockitoBean private FhirContext fhirContext;
   @Autowired ValidationServiceConnectionService underTest;
 
-  private static void setupVS(
-      final String contentType, final ResponseDefinitionBuilder responseDefBuilder) {
-    stubFor(
-        post(ENDPOINT_VS)
-            .withHeader(CONTENT_TYPE, equalTo(contentType))
-            .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-            .withRequestBody(equalTo(REQUEST_BODY))
-            .willReturn(responseDefBuilder));
-  }
-
-  private static MediaType getMediaType(final MessageType messageType) {
-    return switch (messageType) {
-      case JSON -> APPLICATION_JSON;
-      case XML -> APPLICATION_XML;
-    };
+  @BeforeEach
+  void beforeEach() {
+    WireMock.reset();
   }
 
   private IParser setupFhirJsonParserMock() {
@@ -116,58 +106,112 @@ class ValidationServiceConnectionIntegrationTest {
     return outcome;
   }
 
-  @BeforeEach
-  void setUp() {
-    final var mockRequest = new MockHttpServletRequest();
-    mockRequest.addHeader(HEADER_FHIR_API_VERSION, "6");
-    mockRequest.addHeader(HEADER_FHIR_PROFILE, "fhir-profile-snapshots");
+  private static MediaType getMediaType(final MessageType messageType) {
+    return switch (messageType) {
+      case JSON -> APPLICATION_JSON;
+      case XML -> APPLICATION_XML;
+    };
+  }
 
+  private static void setupVS(
+      final String contentType,
+      final String version,
+      final String profile,
+      final ResponseDefinitionBuilder responseDefBuilder) {
+    stubFor(
+        post(ENDPOINT_VS)
+            .withHeader(CONTENT_TYPE, equalTo(contentType))
+            .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+            .withHeader(HEADER_FHIR_API_VERSION, version == null ? absent() : equalTo(version))
+            .withHeader(HEADER_FHIR_PROFILE, profile == null ? absent() : equalTo(profile))
+            .withRequestBody(equalTo(REQUEST_BODY))
+            .willReturn(responseDefBuilder));
+  }
+
+  private static void setupVS(
+      final String contentType, final ResponseDefinitionBuilder responseDefBuilder) {
+    setupVS(contentType, null, null, responseDefBuilder);
+  }
+
+  private static void setRequestHeaders(final Map<String, String> headers) {
+    final var mockRequest = new MockHttpServletRequest();
+    for (var entry : headers.entrySet()) {
+      mockRequest.addHeader(entry.getKey(), entry.getValue());
+    }
     final var attrs = new ServletRequestAttributes(mockRequest);
     RequestContextHolder.setRequestAttributes(attrs);
   }
 
   @ParameterizedTest
   @EnumSource(MessageType.class)
-  void validationOkay(final MessageType messageType) {
-    final MediaType contentType = getMediaType(messageType);
-    setupVS(contentType.toString(), okJson(RESPONSE_BODY));
+  void validationOkayWithSpecificVersionAndProfile(final MessageType messageType) {
+    final String apiVersion = "6";
+    final String profile = "fhir-profile-snapshots";
+    final String contentType =
+        switch (messageType) {
+          case JSON -> APPLICATION_JSON_VALUE;
+          case XML -> APPLICATION_XML_VALUE;
+        };
+    setRequestHeaders(Map.of(HEADER_FHIR_API_VERSION, apiVersion, HEADER_FHIR_PROFILE, profile));
+    setupVS(contentType, apiVersion, profile, okJson(RESPONSE_BODY));
     final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
+    final ValidationResult result =
+        underTest.validateBundle(getMediaType(messageType), REQUEST_BODY);
 
-    final ValidationResult result = underTest.validateBundle(contentType, REQUEST_BODY);
-
-    assertThat(result)
-        .isNotNull()
-        .returns(true, ValidationResult::isValid)
-        .returns(outcome, ValidationResult::operationOutcome);
+    assertThat(result.operationOutcome()).isEqualTo(outcome);
   }
 
   @ParameterizedTest
   @EnumSource(MessageType.class)
-  void validationErrorOutcome(final MessageType messageType) {
-    final var contentType = getMediaType(messageType);
-
-    setupVS(
-        contentType.toString(),
-        WireMock.status(422)
-            .withBody(RESPONSE_BODY)
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE));
-
+  void validationOkayWithoutSpecificVersionAndProfile(final MessageType messageType) {
+    final String profile = "fhir-profile-snapshots";
+    final String contentType =
+        switch (messageType) {
+          case JSON -> APPLICATION_JSON_VALUE;
+          case XML -> APPLICATION_XML_VALUE;
+        };
+    setRequestHeaders(Map.of(HEADER_FHIR_PROFILE, profile));
+    setupVS(contentType, null, profile, okJson(RESPONSE_BODY));
     final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
-    outcome.addIssue().setSeverity(ERROR);
+    final ValidationResult result =
+        underTest.validateBundle(getMediaType(messageType), REQUEST_BODY);
 
-    final ValidationResult result = underTest.validateBundle(contentType, REQUEST_BODY);
-
-    assertThat(result)
-        .isNotNull()
-        .returns(false, ValidationResult::isValid)
-        .returns(outcome, ValidationResult::operationOutcome);
+    assertThat(result.operationOutcome()).isEqualTo(outcome);
   }
 
-  @Test
-  void validationCallException() {
-    setupVS(APPLICATION_JSON_VALUE, WireMock.serverError());
-    assertThatThrownBy(() -> underTest.validateBundle(APPLICATION_JSON, REQUEST_BODY))
-        .isExactlyInstanceOf(RestClientException.class);
+  @ParameterizedTest
+  @EnumSource(MessageType.class)
+  void validationOkayWithSpecificProfile(final MessageType messageType) {
+    final String contentType =
+        switch (messageType) {
+          case JSON -> APPLICATION_JSON_VALUE;
+          case XML -> APPLICATION_XML_VALUE;
+        };
+    setRequestHeaders(Map.of());
+    setupVS(contentType, null, null, okJson(RESPONSE_BODY));
+    final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
+    final ValidationResult result =
+        underTest.validateBundle(getMediaType(messageType), REQUEST_BODY);
+
+    assertThat(result.operationOutcome()).isEqualTo(outcome);
+  }
+
+  @ParameterizedTest
+  @EnumSource(MessageType.class)
+  void validationOkayWithSpecificVersion(final MessageType messageType) {
+    final String apiVersion = "6";
+    final String contentType =
+        switch (messageType) {
+          case JSON -> APPLICATION_JSON_VALUE;
+          case XML -> APPLICATION_XML_VALUE;
+        };
+    setRequestHeaders(Map.of(HEADER_FHIR_API_VERSION, apiVersion));
+    setupVS(contentType, apiVersion, null, okJson(RESPONSE_BODY));
+    final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
+    final ValidationResult result =
+        underTest.validateBundle(getMediaType(messageType), REQUEST_BODY);
+
+    assertThat(result.operationOutcome()).isEqualTo(outcome);
   }
 
   @AfterEach
