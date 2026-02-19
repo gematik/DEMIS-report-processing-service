@@ -7,7 +7,7 @@ All URIs are relative to *http://localhost*
 
 | Class | Method | HTTP request | Description |
 |------------ | ------------- | ------------- | -------------|
-| *ReportProcessingControllerApi* | [**processReport**](Apis/ReportProcessingControllerApi.md#processreport) | **POST** /$process-report |  |
+| *ReportProcessingControllerApi* | [**processReport**](Apis/ReportProcessingControllerApi.md#processReport) | **POST** /$process-report |  |
 
 
 <a name="documentation-for-models"></a>

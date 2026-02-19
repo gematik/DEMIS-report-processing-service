@@ -43,7 +43,6 @@ customEnvVars:
   DEMIS_NETWORK_HOSPITAL_LOCATION_SERVICE_ADDRESS: http://hospital-location-service.demis.svc.cluster.local
   DEMIS_NETWORK_PDFGEN_SERVICE_ADDRESS: http://pdfgen-service.demis.svc.cluster.local
   DEMIS_NETWORK_CONTEXT_ENRICHMENT_SERVICE_ADDRESS: http://context-enrichment-service.demis.svc.cluster.local
-  FEATURE_FLAG_NEW_API_ENDPOINTS: "false"
 
 # Define Image Pull Secrets if using private registry
 imagePullSecrets: []

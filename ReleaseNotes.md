@@ -2,6 +2,10 @@
 
 # Release notes
 
+## Release 2.2.1
+- updated Plugins and Libraries
+- removed FEATURE_FLAG_NEW_API_ENDPOINTS
+
 ## Release 2.2.0
 - add feature flag FEATURE_FLAG_NEW_API_ENDPOINTS for header propagation of x-fhir-api-version and x-fhir-profile to validation-service
 - add support for new hospital location service endpoint
