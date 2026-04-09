@@ -2,6 +2,12 @@
 
 # Release notes
 
+## Release 2.3.0 
+- updated base-image and updated from java 21 to java 25
+- Removed istio helm chart
+- updated spring-parent to version 2.15.6
+- activated feign header forwarding
+
 ## Release 2.2.1
 - updated Plugins and Libraries
 - removed FEATURE_FLAG_NEW_API_ENDPOINTS

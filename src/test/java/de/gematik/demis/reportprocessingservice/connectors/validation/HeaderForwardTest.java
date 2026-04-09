@@ -32,8 +32,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_API_VERSION;
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_PROFILE;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_API_VERSION;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_PROFILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
@@ -72,11 +72,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
       "feature.flag.relaxed.validation=false",
-      "feature.flag.new.api.endpoints=true"
     })
 @AutoConfigureWireMock(port = 0)
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})
-public class HeaderForwardTest {
+class HeaderForwardTest {
   private static final String ENDPOINT_VS = "/VS/$validate";
 
   private static final String REQUEST_BODY = "my body";
@@ -127,11 +126,6 @@ public class HeaderForwardTest {
             .withHeader(HEADER_FHIR_PROFILE, profile == null ? absent() : equalTo(profile))
             .withRequestBody(equalTo(REQUEST_BODY))
             .willReturn(responseDefBuilder));
-  }
-
-  private static void setupVS(
-      final String contentType, final ResponseDefinitionBuilder responseDefBuilder) {
-    setupVS(contentType, null, null, responseDefBuilder);
   }
 
   private static void setRequestHeaders(final Map<String, String> headers) {
