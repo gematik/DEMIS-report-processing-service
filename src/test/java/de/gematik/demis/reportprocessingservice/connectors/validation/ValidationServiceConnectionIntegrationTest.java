@@ -31,8 +31,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_API_VERSION;
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_PROFILE;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_API_VERSION;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_PROFILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR;
@@ -71,7 +71,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
       "feature.flag.relaxed.validation=false",
-      "feature.flag.new.api.endpoints=false"
     })
 @AutoConfigureWireMock(port = 0)
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})

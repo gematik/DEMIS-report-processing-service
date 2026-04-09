@@ -27,17 +27,11 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * #L%
  */
 
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_API_VERSION;
-import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceClient.HEADER_FHIR_PROFILE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 import ca.uhn.fhir.context.FhirContext;
 import feign.Response;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +64,6 @@ class ValidationServiceRelaxedModeTest {
   private static final FhirContext fhirContext = FhirContext.forR4Cached();
 
   @Mock ValidationServiceClient validationServiceClient;
-  @Mock HttpServletRequest httpServletRequest;
   private ValidationServiceConnectionService underTest;
 
   private static Response mockResponse(final int status, final String content) throws IOException {
@@ -98,27 +91,20 @@ class ValidationServiceRelaxedModeTest {
 
   @BeforeEach
   void setup() {
-    underTest =
-        new ValidationServiceConnectionService(
-            validationServiceClient, fhirContext, httpServletRequest);
+    underTest = new ValidationServiceConnectionService(validationServiceClient, fhirContext);
     underTest.relaxedMode = true;
-    underTest.isVersionHeaderForwardEnabled = false;
     underTest.outcomeIssueThreshold = IssueSeverity.INFORMATION;
-    lenient().when(httpServletRequest.getHeader(HEADER_FHIR_API_VERSION)).thenReturn("6");
-    lenient()
-        .when(httpServletRequest.getHeader(HEADER_FHIR_PROFILE))
-        .thenReturn("fhir-profile-snapshots");
   }
 
   @Test
   void parsedFhirNotificationIsValid() throws Exception {
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(any(), eq(ORIGINAL_NOTIFICATION)))
+    Mockito.when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
         .thenReturn(firstResponse);
 
     final var secondTryResponse = mockResponse(200, null);
-    Mockito.when(validationServiceClient.validateBundleJson(any(), eq(CORRECTED_NOTIFICATION)))
+    Mockito.when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
         .thenReturn(secondTryResponse);
 
     final ValidationResult result =
@@ -134,11 +120,11 @@ class ValidationServiceRelaxedModeTest {
   void parsedFhirNotificationIsStillInvalid() throws Exception {
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(any(), eq(ORIGINAL_NOTIFICATION)))
+    Mockito.when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
         .thenReturn(firstResponse);
 
     final var secondTryResponse = mockResponse(422, null);
-    Mockito.when(validationServiceClient.validateBundleJson(any(), eq(CORRECTED_NOTIFICATION)))
+    Mockito.when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
         .thenReturn(secondTryResponse);
 
     final ValidationResult result =
@@ -163,7 +149,7 @@ class ValidationServiceRelaxedModeTest {
 """;
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(any(), eq(notParseableNotification)))
+    Mockito.when(validationServiceClient.validateBundleXml(notParseableNotification))
         .thenReturn(firstResponse);
     // Note: No second try (that's the difference to parsedFhirNotificationIsStillInvalid)
 

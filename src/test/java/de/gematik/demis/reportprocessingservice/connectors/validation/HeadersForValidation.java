@@ -27,27 +27,7 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * #L%
  */
 
-import feign.Response;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-@FeignClient(
-    name = "validation-service",
-    url = "${demis.network.validation-service-address}",
-    configuration = ValidationClientConfiguration.class)
-public interface ValidationServiceClient {
-
-  @PostMapping(
-      value = "/$validate",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  Response validateBundleJson(@RequestBody String bundleAsJson);
-
-  @PostMapping(
-      value = "/$validate",
-      consumes = MediaType.APPLICATION_XML_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  Response validateBundleXml(@RequestBody String bundleAsXml);
+public class HeadersForValidation {
+  static final String HEADER_FHIR_API_VERSION = "x-fhir-api-version";
+  static final String HEADER_FHIR_PROFILE = "x-fhir-profile";
 }

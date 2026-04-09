@@ -32,7 +32,6 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
@@ -46,7 +45,6 @@ import ca.uhn.fhir.parser.IParser;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBedOccupancyDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.ReportBundleDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.reports.StatisticInformationBedOccupancyDataBuilder;
-import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.AddressDataBuilder;
 import de.gematik.demis.notification.builder.demis.fhir.notification.builder.technicals.PractitionerRoleBuilder;
 import de.gematik.demis.reportprocessingservice.connectors.ces.ContextEnrichmentService;
 import de.gematik.demis.reportprocessingservice.connectors.fhirstorage.FhirStorageWriterClient;
@@ -65,7 +63,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
@@ -129,9 +126,9 @@ class ReportProcessingServiceIntegrationTest {
         .setDiagnostics("For Test");
     final String validationOutcomeJson =
         fhirContext.newJsonParser().encodeResourceToString(validationOutcome);
-    when(validationServiceClient.validateBundleXml(any(), anyString()))
+    when(validationServiceClient.validateBundleXml(anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
-    when(validationServiceClient.validateBundleJson(any(), anyString()))
+    when(validationServiceClient.validateBundleJson(anyString()))
         .thenReturn(createResponse(200, validationOutcomeJson));
     when(fhirStorageWriterClient.sendNotificationToFhirStorageWriter(anyString()))
         .thenReturn(ResponseEntity.ok().build());
@@ -220,7 +217,7 @@ class ReportProcessingServiceIntegrationTest {
 
     String operationOutcomeAsJson =
         fhirContext.newJsonParser().encodeResourceToString(operationOutcome);
-    when(validationServiceClient.validateBundleJson(any(), anyString()))
+    when(validationServiceClient.validateBundleJson(anyString()))
         .thenReturn(createResponse(422, operationOutcomeAsJson));
 
     String body =
@@ -346,13 +343,6 @@ class ReportProcessingServiceIntegrationTest {
   @Test
   void
       shouldCreateReceiptBundleWithReceivedBundleIdentifierAsExtensionAndChecktIdentifierIsOverwritten() {
-    Address address =
-        new AddressDataBuilder()
-            .setPostalCode("10117")
-            .setCity("Berlin")
-            .setStreet("Friedrichstr.")
-            .setHouseNumber("136")
-            .build();
     final Practitioner practitioner = new Practitioner();
     practitioner.setId(UUID.randomUUID().toString());
     final Organization organization = new Organization().setName("Testkrankenhaus - gematik GmbH");
