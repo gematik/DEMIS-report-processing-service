@@ -41,6 +41,7 @@ import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.StringDecoder;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,8 @@ public class ValidationServiceConnectionService {
   private final RPSErrorDecoder errorDecoder =
       new RPSErrorDecoder("validation-service", ERROR_IN_VALIDATION_CALL, ERROR_IN_VALIDATION_CALL);
 
-  @Value("${feature.flag.relaxed.validation:false}")
-  boolean relaxedMode;
+  private final HttpServletRequest httpServletRequest;
+  public static final String HEADER_VALIDATION_RELAXED = "x-validation-relaxed";
 
   @Value("${config.opt.outcome.issue.level:warning}")
   IssueSeverity outcomeIssueThreshold = IssueSeverity.WARNING;
@@ -76,7 +77,7 @@ public class ValidationServiceConnectionService {
 
   @PostConstruct
   void logConfig() {
-    log.info("relaxedMode={}, outcomeIssueThreshold={}", relaxedMode, outcomeIssueThreshold);
+    log.info("outcomeIssueThreshold={}", outcomeIssueThreshold);
   }
 
   public ValidationResult validateBundle(final MediaType contentType, final String content) {
@@ -98,6 +99,10 @@ public class ValidationServiceConnectionService {
         body.isBlank()
             ? new OperationOutcome()
             : fhirContext.newJsonParser().parseResource(OperationOutcome.class, body);
+
+    final boolean relaxedMode =
+        Boolean.parseBoolean(httpServletRequest.getHeader(HEADER_VALIDATION_RELAXED));
+    log.info("relaxedMode={}", relaxedMode);
 
     final boolean isValid;
     if (isStatusSuccessful(status)) {

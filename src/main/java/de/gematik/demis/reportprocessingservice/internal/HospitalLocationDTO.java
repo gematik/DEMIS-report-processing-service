@@ -30,14 +30,17 @@ package de.gematik.demis.reportprocessingservice.internal;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @Builder
-// Allows Jackson to create an instance of this class using the builder
-@JsonPOJOBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
 public class HospitalLocationDTO {
 
   @JsonProperty("id")

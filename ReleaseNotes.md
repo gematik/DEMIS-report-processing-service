@@ -1,6 +1,12 @@
 <img align="right" width="200" height="37" src="media/Gematik_Logo_Flag.png"/> <br/>
 
 # Release notes
+## Release 2.4.0
+- spring boot 4 upgrade
+- arranged jvm options and resource limits
+- optimized custom environment variables handling in helm chart
+- updated docker base image to gematik1/osadl-alpine-openjdk25-jre:1.0.5
+- replaced ff FEATURE_FLAG_RELAXED_VALIDATION by x-validation-relaxed request header control
 
 ## Release 2.3.0 
 - updated base-image and updated from java 21 to java 25

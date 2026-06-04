@@ -27,13 +27,13 @@ package de.gematik.demis.reportprocessingservice.utils;
  * #L%
  */
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 class CustomResponseEntityTest {
 
@@ -42,31 +42,31 @@ class CustomResponseEntityTest {
     CustomResponseEntity customResponseEntity = new CustomResponseEntity(HttpStatus.ACCEPTED);
     assertThat(customResponseEntity.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
     assertThat(customResponseEntity.getBody()).isNull();
-    assertThat(customResponseEntity.getHeaders()).isEmpty();
+    assertThat(customResponseEntity.getHeaders().toSingleValueMap()).isEmpty();
   }
 
   @Test
   void shouldCreateEntityWithStatusAndHeader() {
-    HttpHeaders headers = new HttpHeaders();
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(HttpHeaders.ACCEPT, "headerValue1");
     CustomResponseEntity customResponseEntity =
         new CustomResponseEntity(headers, HttpStatus.ACCEPTED);
     assertThat(customResponseEntity.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
     assertThat(customResponseEntity.getBody()).isNull();
-    assertThat(customResponseEntity.getHeaders())
-        .containsEntry(HttpHeaders.ACCEPT, singletonList("headerValue1"));
+    assertThat(customResponseEntity.getHeaders().toSingleValueMap())
+        .containsEntry(HttpHeaders.ACCEPT, "headerValue1");
   }
 
   @Test
   void shouldCreateEntityWithStatusAndHeaderAndBody() {
-    HttpHeaders headers = new HttpHeaders();
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(HttpHeaders.ACCEPT, "headerValue1");
     String body = "body";
     CustomResponseEntity customResponseEntity =
         new CustomResponseEntity(body, headers, HttpStatus.ACCEPTED);
     assertThat(customResponseEntity.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-    assertThat(customResponseEntity.getHeaders())
-        .containsEntry(HttpHeaders.ACCEPT, singletonList("headerValue1"));
+    assertThat(customResponseEntity.getHeaders().toSingleValueMap())
+        .containsEntry(HttpHeaders.ACCEPT, "headerValue1");
     assertThat(customResponseEntity.getBody()).isEqualTo(body);
   }
 }

@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_API_VERSION;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_PROFILE;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceConnectionService.HEADER_VALIDATION_RELAXED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR;
@@ -60,19 +61,18 @@ import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.wiremock.spring.EnableWireMock;
 
 @SpringBootTest(
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
-      "feature.flag.relaxed.validation=false",
     })
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})
 class ValidationServiceConnectionIntegrationTest {
   private static final String ENDPOINT_VS = "/VS/$validate";
@@ -121,6 +121,7 @@ class ValidationServiceConnectionIntegrationTest {
     final var mockRequest = new MockHttpServletRequest();
     mockRequest.addHeader(HEADER_FHIR_API_VERSION, "6");
     mockRequest.addHeader(HEADER_FHIR_PROFILE, "fhir-profile-snapshots");
+    mockRequest.addHeader(HEADER_VALIDATION_RELAXED, "false");
 
     final var attrs = new ServletRequestAttributes(mockRequest);
     RequestContextHolder.setRequestAttributes(attrs);
