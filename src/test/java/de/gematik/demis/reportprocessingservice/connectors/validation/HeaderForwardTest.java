@@ -34,6 +34,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_API_VERSION;
 import static de.gematik.demis.reportprocessingservice.connectors.validation.HeadersForValidation.HEADER_FHIR_PROFILE;
+import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceConnectionService.HEADER_VALIDATION_RELAXED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
@@ -59,21 +60,20 @@ import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.wiremock.spring.EnableWireMock;
 
 @SpringBootTest
 @TestPropertySource(
     properties = {
       "demis.network.validation-service-address=http://localhost:${wiremock.server.port}/VS",
-      "feature.flag.relaxed.validation=false",
     })
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @EnableAutoConfiguration(exclude = {SpringDocConfiguration.class})
 class HeaderForwardTest {
   private static final String ENDPOINT_VS = "/VS/$validate";
@@ -142,12 +142,20 @@ class HeaderForwardTest {
   void validationOkayWithSpecificVersionAndProfile(final MessageType messageType) {
     final String apiVersion = "6";
     final String profile = "fhir-profile-snapshots";
+    final String relaxedValidationActivated = "false";
     final String contentType =
         switch (messageType) {
           case JSON -> APPLICATION_JSON_VALUE;
           case XML -> APPLICATION_XML_VALUE;
         };
-    setRequestHeaders(Map.of(HEADER_FHIR_API_VERSION, apiVersion, HEADER_FHIR_PROFILE, profile));
+    setRequestHeaders(
+        Map.of(
+            HEADER_FHIR_API_VERSION,
+            apiVersion,
+            HEADER_FHIR_PROFILE,
+            profile,
+            HEADER_VALIDATION_RELAXED,
+            relaxedValidationActivated));
     setupVS(contentType, apiVersion, profile, okJson(RESPONSE_BODY));
     final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
     final ValidationResult result =
@@ -160,12 +168,15 @@ class HeaderForwardTest {
   @EnumSource(MessageType.class)
   void validationOkayWithoutSpecificVersionAndProfile(final MessageType messageType) {
     final String profile = "fhir-profile-snapshots";
+    final String relaxedValidationActivated = "false";
     final String contentType =
         switch (messageType) {
           case JSON -> APPLICATION_JSON_VALUE;
           case XML -> APPLICATION_XML_VALUE;
         };
-    setRequestHeaders(Map.of(HEADER_FHIR_PROFILE, profile));
+    setRequestHeaders(
+        Map.of(
+            HEADER_FHIR_PROFILE, profile, HEADER_VALIDATION_RELAXED, relaxedValidationActivated));
     setupVS(contentType, null, profile, okJson(RESPONSE_BODY));
     final OperationOutcome outcome = mockParseOutcomeForResponse(RESPONSE_BODY);
     final ValidationResult result =

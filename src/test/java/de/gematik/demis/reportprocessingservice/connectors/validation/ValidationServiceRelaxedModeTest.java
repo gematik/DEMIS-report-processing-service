@@ -27,11 +27,17 @@ package de.gematik.demis.reportprocessingservice.connectors.validation;
  * #L%
  */
 
+import static de.gematik.demis.reportprocessingservice.connectors.validation.ValidationServiceConnectionService.HEADER_VALIDATION_RELAXED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 import ca.uhn.fhir.context.FhirContext;
 import feign.Response;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -66,13 +72,15 @@ class ValidationServiceRelaxedModeTest {
   @Mock ValidationServiceClient validationServiceClient;
   private ValidationServiceConnectionService underTest;
 
+  @Mock HttpServletRequest httpServletRequest;
+
   private static Response mockResponse(final int status, final String content) throws IOException {
     final Response response = Mockito.mock(Response.class);
-    Mockito.when(response.status()).thenReturn(status);
+    when(response.status()).thenReturn(status);
     if (content != null) {
       final Response.Body body = Mockito.mock(Response.Body.class);
-      Mockito.when(body.asReader(StandardCharsets.UTF_8)).thenReturn(new StringReader(content));
-      Mockito.when(response.body()).thenReturn(body);
+      when(body.asReader(StandardCharsets.UTF_8)).thenReturn(new StringReader(content));
+      when(response.body()).thenReturn(body);
     }
     return response;
   }
@@ -91,20 +99,22 @@ class ValidationServiceRelaxedModeTest {
 
   @BeforeEach
   void setup() {
-    underTest = new ValidationServiceConnectionService(validationServiceClient, fhirContext);
-    underTest.relaxedMode = true;
+    when(httpServletRequest.getHeader(HEADER_VALIDATION_RELAXED)).thenReturn("true");
+    underTest =
+        new ValidationServiceConnectionService(
+            validationServiceClient, fhirContext, httpServletRequest);
     underTest.outcomeIssueThreshold = IssueSeverity.INFORMATION;
   }
 
   @Test
-  void parsedFhirNotificationIsValid() throws Exception {
+  void parsedFhirNotificationIsValid_ValidationRelaxedHeaderTrue() throws Exception {
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
+    when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
         .thenReturn(firstResponse);
 
     final var secondTryResponse = mockResponse(200, null);
-    Mockito.when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
+    when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
         .thenReturn(secondTryResponse);
 
     final ValidationResult result =
@@ -114,17 +124,80 @@ class ValidationServiceRelaxedModeTest {
     assertThat(result.operationOutcome().getIssue())
         .extracting(OperationOutcomeIssueComponent::getSeverity)
         .containsExactly(IssueSeverity.WARNING, IssueSeverity.WARNING, IssueSeverity.INFORMATION);
+
+    verify(validationServiceClient, times(1)).validateBundleXml(ORIGINAL_NOTIFICATION);
+    verify(validationServiceClient, times(1)).validateBundleJson(CORRECTED_NOTIFICATION);
+  }
+
+  @Test
+  void throwsRpsException_ValidationRelaxedHeaderFalse() throws Exception {
+    when(httpServletRequest.getHeader(HEADER_VALIDATION_RELAXED)).thenReturn("false");
+    final var outcome = createOperationOutcomeOfValidationService();
+    final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
+    when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
+        .thenReturn(firstResponse);
+
+    final ValidationResult result =
+        underTest.validateBundle(APPLICATION_XML, ORIGINAL_NOTIFICATION);
+    assertThat(result).isNotNull().returns(false, ValidationResult::isValid);
+    assertThat(result.operationOutcome()).isNotNull();
+    assertThat(result.operationOutcome().getIssue())
+        .extracting(OperationOutcomeIssueComponent::getSeverity)
+        .containsExactly(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.INFORMATION);
+
+    verify(validationServiceClient, times(1)).validateBundleXml(ORIGINAL_NOTIFICATION);
+    verify(validationServiceClient, never()).validateBundleJson(CORRECTED_NOTIFICATION);
+  }
+
+  @Test
+  void throwsRpsException_ValidationRelaxedHeaderNotSet() throws Exception {
+    when(httpServletRequest.getHeader(HEADER_VALIDATION_RELAXED)).thenReturn(null);
+    final var outcome = createOperationOutcomeOfValidationService();
+    final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
+    when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
+        .thenReturn(firstResponse);
+
+    final ValidationResult result =
+        underTest.validateBundle(APPLICATION_XML, ORIGINAL_NOTIFICATION);
+    assertThat(result).isNotNull().returns(false, ValidationResult::isValid);
+    assertThat(result.operationOutcome()).isNotNull();
+    assertThat(result.operationOutcome().getIssue())
+        .extracting(OperationOutcomeIssueComponent::getSeverity)
+        .containsExactly(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.INFORMATION);
+
+    verify(validationServiceClient, times(1)).validateBundleXml(ORIGINAL_NOTIFICATION);
+    verify(validationServiceClient, never()).validateBundleJson(CORRECTED_NOTIFICATION);
+  }
+
+  @Test
+  void throwsRpsException_ValidationRelaxedHeaderOtherValue() throws Exception {
+    when(httpServletRequest.getHeader(HEADER_VALIDATION_RELAXED)).thenReturn("invalid");
+    final var outcome = createOperationOutcomeOfValidationService();
+    final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
+    when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
+        .thenReturn(firstResponse);
+
+    final ValidationResult result =
+        underTest.validateBundle(APPLICATION_XML, ORIGINAL_NOTIFICATION);
+    assertThat(result).isNotNull().returns(false, ValidationResult::isValid);
+    assertThat(result.operationOutcome()).isNotNull();
+    assertThat(result.operationOutcome().getIssue())
+        .extracting(OperationOutcomeIssueComponent::getSeverity)
+        .containsExactly(IssueSeverity.FATAL, IssueSeverity.ERROR, IssueSeverity.INFORMATION);
+
+    verify(validationServiceClient, times(1)).validateBundleXml(ORIGINAL_NOTIFICATION);
+    verify(validationServiceClient, never()).validateBundleJson(CORRECTED_NOTIFICATION);
   }
 
   @Test
   void parsedFhirNotificationIsStillInvalid() throws Exception {
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
+    when(validationServiceClient.validateBundleXml(ORIGINAL_NOTIFICATION))
         .thenReturn(firstResponse);
 
     final var secondTryResponse = mockResponse(422, null);
-    Mockito.when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
+    when(validationServiceClient.validateBundleJson(CORRECTED_NOTIFICATION))
         .thenReturn(secondTryResponse);
 
     final ValidationResult result =
@@ -149,7 +222,7 @@ class ValidationServiceRelaxedModeTest {
 """;
     final var outcome = createOperationOutcomeOfValidationService();
     final var firstResponse = mockResponse(422, fhirResourceToJson(outcome));
-    Mockito.when(validationServiceClient.validateBundleXml(notParseableNotification))
+    when(validationServiceClient.validateBundleXml(notParseableNotification))
         .thenReturn(firstResponse);
     // Note: No second try (that's the difference to parsedFhirNotificationIsStillInvalid)
 

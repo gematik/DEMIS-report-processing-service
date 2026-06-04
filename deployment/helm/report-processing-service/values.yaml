@@ -6,6 +6,7 @@ replicaCount: 2
 # Enables debug mode
 debug:
   enable: false
+  params: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9000"
 
 # Required Values for the Chart
 required:
@@ -19,11 +20,10 @@ required:
     # If not given, the Chart AppVersion will be used
     tag: null
 
-# Define custom Container Entrypoint and Arguments (e.g. JVM Tuning)
 # If not given, the Entrypoint defined in Dockerfile will be used
 application:
-  entrypoint: ["java"]
-  parameters: ["-XX:ActiveProcessorCount=2", "-XX:MaxRAMPercentage=80.0", "-XX:+TieredCompilation", "-XX:+UseG1GC", "-jar", "/app.jar"]
+  entrypoint: []
+  parameters: []
 
 # Extra Labels to be added
 # E.g.
@@ -36,7 +36,14 @@ deploymentLabels: {}
 
 # Environment Variables to be defined
 customEnvVars:
-  FEATURE_FLAG_RELAXED_VALIDATION: "false"
+  JAVA_TOOL_OPTIONS: "-XX:ActiveProcessorCount=2 -XX:MaxRAMPercentage=45.0 -XX:MaxMetaspaceSize=128m -XX:+UseG1GC"
+  SERVER_PORT: "8080"
+  TZ: "Europe/Berlin"
+  DEMIS_NETWORK_HLS_LOCATIONS_ENDPOINT: "/v1/locations"
+  DEMIS_NETWORK_FSW_CONTEXT_PATH: "/"
+  HLS_VALIDATION_GATEWAY_KEY: "azp"
+  DEMIS_IDP_CLIENT_ID: "notification-entry-service"
+  DEMIS_IDP_ALLOWED_ROLES: "disease-notification-sender"
   CONFIG_OPT_OUTCOME_ISSUE_LEVEL: "WARNING"
   DEMIS_NETWORK_VALIDATION_SERVICE_ADDRESS: http://validation-service.demis.svc.cluster.local
   DEMIS_NETWORK_FHIR_STORAGE_WRITER_ADDRESS: http://fhir-storage-writer.demis.svc.cluster.local
@@ -113,10 +120,10 @@ service:
 # Default Resources
 resources:
   limits:
-    memory: "500Mi"
+    memory: "450Mi"
   requests:
     cpu: "50m"
-    memory: "500Mi"
+    memory: "450Mi"
 
 autoscaling:
   enabled: false

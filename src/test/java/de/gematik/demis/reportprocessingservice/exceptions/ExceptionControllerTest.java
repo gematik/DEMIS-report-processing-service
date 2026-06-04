@@ -83,7 +83,7 @@ class ExceptionControllerTest {
       final ResponseEntity<String> result =
           exceptionControllerUnderTest.handleUnprocessableEntityException(exception, request);
 
-      assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(422));
+      assertThat(result.getStatusCode().value()).isEqualTo(422);
       assertThat(result.getBody())
           .isEqualTo(
               "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"exception\",\"diagnostics\":\"94709a92-ee29-4b85-99a0-e9c8dd2afd3d: localizedMessage\"}]}");
@@ -184,7 +184,7 @@ class ExceptionControllerTest {
           exceptionControllerUnderTest.handleHospitalLocationValidationException(
               exception, request);
 
-      assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(422));
+      assertThat(result.getStatusCode().value()).isEqualTo(422);
       assertThat(result.getBody())
           .isEqualTo(
               "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"exception\",\"diagnostics\":\"94709a92-ee29-4b85-99a0-e9c8dd2afd3d: Localized Message\"}]}");
