@@ -1,6 +1,14 @@
 <img align="right" width="200" height="37" src="media/Gematik_Logo_Flag.png"/> <br/>
 
 # Release notes
+## Release 2.4.1
+- arranged jvm options
+- fixed handling of falsy custom environment variables (false, 0) in helm chart
+- updated spring-parent to 4.1.8
+- added header x-sender for header forwarding
+- updated docker base image to gematik1/osadl-alpine-openjdk25-jre:1.0.7
+- added VEX documents to repository
+
 ## Release 2.4.0
 - spring boot 4 upgrade
 - arranged jvm options and resource limits

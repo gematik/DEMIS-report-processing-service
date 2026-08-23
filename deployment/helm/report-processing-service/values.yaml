@@ -36,7 +36,7 @@ deploymentLabels: {}
 
 # Environment Variables to be defined
 customEnvVars:
-  JAVA_TOOL_OPTIONS: "-XX:ActiveProcessorCount=2 -XX:MaxRAMPercentage=45.0 -XX:MaxMetaspaceSize=128m -XX:+UseG1GC"
+  JAVA_TOOL_OPTIONS: "-XX:ActiveProcessorCount=2 -XX:MaxRAMPercentage=30.0 -XX:MaxMetaspaceSize=128m -XX:+UseG1GC"
   SERVER_PORT: "8080"
   TZ: "Europe/Berlin"
   DEMIS_NETWORK_HLS_LOCATIONS_ENDPOINT: "/v1/locations"
